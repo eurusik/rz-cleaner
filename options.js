@@ -34,7 +34,11 @@
 
     const aiButton = (SELECTORS.aiButton || SELECTORS.ai || []).filter(Boolean);
     const aiConsultation = (SELECTORS.aiConsultation || []).filter(Boolean);
-    return { promoMain, redBonus, aiButton, aiConsultation };
+    const popularSearchChips = (SELECTORS.popularSearchChips || [])
+      .map((rule) => (rule && rule.query ? rule.query : ""))
+      .filter(Boolean);
+
+    return { promoMain, redBonus, aiButton, aiConsultation, popularSearchChips };
   }
 
   function renderActiveSelectors(settings) {
@@ -53,7 +57,10 @@
       ...builtIn.aiButton,
       "",
       "# Rozetka AI consultation selectors (built-in)",
-      ...builtIn.aiConsultation
+      ...builtIn.aiConsultation,
+      "",
+      "# Popular search chips selectors (built-in)",
+      ...builtIn.popularSearchChips
     ];
 
     if (custom.length) {

@@ -17,6 +17,7 @@
     RED_BONUS: "red-bonus",
     AI_BUTTON: "ai-button",
     AI_CONSULT: "ai-consultation",
+    POPULAR_SEARCH_CHIPS: "popular-search-chips",
     CUSTOM: "custom"
   };
 
@@ -38,11 +39,13 @@
     "rz-product-red-bonus",
     "rz-chat-bot-button-assist",
     "rz-chat-bot-button-placeholder",
+    "rz-tag-list",
     '[data-testid="promo-price"]',
     ".red-label",
     ".red-icon",
     ".bonus__red",
-    ".loyalty__red-card"
+    ".loyalty__red-card",
+    ".tags-list"
   ].join(", ");
   const HINT_TAGS = new Set([
     "RZ-PRODUCT-TILE",
@@ -51,9 +54,10 @@
     "RZ-TILE-BONUS",
     "RZ-PRODUCT-RED-BONUS",
     "RZ-CHAT-BOT-BUTTON-ASSIST",
-    "RZ-CHAT-BOT-BUTTON-PLACEHOLDER"
+    "RZ-CHAT-BOT-BUTTON-PLACEHOLDER",
+    "RZ-TAG-LIST"
   ]);
-  const HINT_CLASSES = ["red-label", "red-icon", "bonus__red", "loyalty__red-card"];
+  const HINT_CLASSES = ["red-label", "red-icon", "bonus__red", "loyalty__red-card", "tags-list", "max-three-rows"];
 
   let currentSettings = normalizeSettings(DEFAULTS);
   let observer = null;
@@ -252,6 +256,10 @@
     return SELECTORS.aiConsultation || [];
   }
 
+  function popularSearchChipsRules() {
+    return SELECTORS.popularSearchChips || [];
+  }
+
   function hidePromoPrices(root, settings) {
     if (!settings.hidePromoBlocks) return;
     hideRuleSelectors(root, promoRules(), FEATURE.PROMO_MAIN);
@@ -322,11 +330,42 @@
     });
   }
 
+  function hidePopularSearchChips(root, settings) {
+    if (!settings.hidePopularSearchChips) return;
+    const scope = root && root.querySelectorAll ? root : document;
+    const matchedBySelectors = hideRuleSelectors(root, popularSearchChipsRules(), FEATURE.POPULAR_SEARCH_CHIPS);
+
+    if (matchedBySelectors) return;
+
+    if (scope !== document) {
+      const text = (scope.textContent || "").toLowerCase();
+      if (!text.includes("популярні запити")) return;
+    }
+
+    const textNodes = safeQueryAll(scope, "div, p, span, h2, h3, h4");
+    textNodes.forEach((el) => {
+      const text = (el.textContent || "").trim().toLowerCase();
+      if (!text.includes("популярні запити")) return;
+
+      const parent = el.parentElement;
+      if (parent && safeQueryAll(parent, "rz-tag-list, .tags-list").length) {
+        hideElement(parent, FEATURE.POPULAR_SEARCH_CHIPS);
+        return;
+      }
+
+      const block = el.closest("div");
+      if (block && safeQueryAll(block, "rz-tag-list, .tags-list").length) {
+        hideElement(block, FEATURE.POPULAR_SEARCH_CHIPS);
+      }
+    });
+  }
+
   function runCleanup(root, settings) {
     hidePromoPrices(root, settings);
     hideRedBonusBlocks(root, settings);
     hideRozetkaAIWidget(root, settings);
     hideAiConsultationBlock(root, settings);
+    hidePopularSearchChips(root, settings);
     hideCustomSelectors(root, settings);
   }
 
@@ -539,6 +578,9 @@
     }
     if (prevSettings.hideAiConsultationBlock && !nextSettings.hideAiConsultationBlock) {
       removeFeatureFromAll(document, FEATURE.AI_CONSULT);
+    }
+    if (prevSettings.hidePopularSearchChips && !nextSettings.hidePopularSearchChips) {
+      removeFeatureFromAll(document, FEATURE.POPULAR_SEARCH_CHIPS);
     }
     if (prevSettings.customHideSelectors !== nextSettings.customHideSelectors) {
       removeFeatureFromAll(document, FEATURE.CUSTOM);

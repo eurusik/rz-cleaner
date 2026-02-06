@@ -10,6 +10,7 @@
       hideRedBonusBlocks: true,
       hideRozetkaAI: true,
       hideAiConsultationBlock: true,
+      hidePopularSearchChips: true,
       normalizePriceLayout: true,
       customHideSelectors: ""
     },
@@ -42,6 +43,11 @@
       aiConsultation: [
         "rz-chat-bot-button-placeholder",
         "rz-chat-bot-button-placeholder .invitation"
+      ],
+      popularSearchChips: [
+        { query: "div.md\\:order-1 rz-tag-list.max-three-rows", closest: "div.md\\:order-1" },
+        { query: "div.md\\:order-1 rz-tag-list .tags-list", closest: "div.md\\:order-1" },
+        { query: "rz-tag-list.max-three-rows", closest: "div.md\\:order-1" }
       ],
       aiTextNodes: "button, a, div, span"
     }
