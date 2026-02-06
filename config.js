@@ -8,6 +8,7 @@
     defaults: {
       hidePromoBlocks: true,
       hideRedBonusBlocks: true,
+      hideAdvertisingSections: true,
       hideRozetkaAI: true,
       hideAiConsultationBlock: true,
       hidePopularSearchChips: true,
@@ -28,6 +29,11 @@
         { query: "rz-tile-bonus .red-icon", closest: "rz-tile-bonus" },
         { query: "rz-product-red-bonus" },
         { query: "rz-product-red-bonus .loyalty__red-card", closest: "rz-product-red-bonus" }
+      ],
+      advertising: [
+        { query: 'rz-section-slider[data-testid="advertising-slider"]' },
+        { query: "rz-section-slider.advertising-slider-theme" },
+        { query: "rz-section-slider rz-advertising-info-btn", closest: "rz-section-slider" }
       ],
       aiButton: [
         "rz-chat-bot-button-assist.right-assist",

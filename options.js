@@ -32,13 +32,17 @@
       .map((rule) => (rule && rule.query ? rule.query : ""))
       .filter(Boolean);
 
+    const advertising = (SELECTORS.advertising || [])
+      .map((rule) => (rule && rule.query ? rule.query : ""))
+      .filter(Boolean);
+
     const aiButton = (SELECTORS.aiButton || SELECTORS.ai || []).filter(Boolean);
     const aiConsultation = (SELECTORS.aiConsultation || []).filter(Boolean);
     const popularSearchChips = (SELECTORS.popularSearchChips || [])
       .map((rule) => (rule && rule.query ? rule.query : ""))
       .filter(Boolean);
 
-    return { promoMain, redBonus, aiButton, aiConsultation, popularSearchChips };
+    return { promoMain, redBonus, advertising, aiButton, aiConsultation, popularSearchChips };
   }
 
   function renderActiveSelectors(settings) {
@@ -52,6 +56,9 @@
       "",
       "# Red bonus selectors (built-in)",
       ...builtIn.redBonus,
+      "",
+      "# Advertising selectors (built-in)",
+      ...builtIn.advertising,
       "",
       "# Rozetka AI button selectors (built-in)",
       ...builtIn.aiButton,
