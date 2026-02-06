@@ -5,9 +5,19 @@
   const STORAGE_KEY = CONFIG.storageKey || "rzc_settings";
   const DEFAULTS = CONFIG.defaults || {};
   const SELECTORS = CONFIG.selectors || { promo: [], ai: [], aiTextNodes: "" };
+  const FALLBACK_TEXT_KEYS = [
+    "aiButtonTexts",
+    "aiConsultationTexts",
+    "popularSearchTexts",
+    "advertisingTexts",
+    "quickFiltersTexts"
+  ].filter((key) => key in DEFAULTS);
+  const ADVANCED_TEXT_KEYS = [...FALLBACK_TEXT_KEYS, "customHideSelectors"].filter((key) => key in DEFAULTS);
 
   const statusEl = document.getElementById("status");
   const activeSelectorsEl = document.getElementById("activeSelectors");
+  const resetFallbackBtn = document.getElementById("resetFallbackTexts");
+  const resetAdvancedBtn = document.getElementById("resetAdvancedSettings");
   const checkboxKeys = Object.keys(DEFAULTS).filter((k) => typeof DEFAULTS[k] === "boolean");
   const textKeys = Object.keys(DEFAULTS).filter((k) => typeof DEFAULTS[k] === "string");
   let statusTimer = 0;
@@ -21,6 +31,15 @@
       .map((line) => line.trim())
       .filter(Boolean)
       .slice(0, 100);
+  }
+
+  function getTextPhrases(raw) {
+    if (typeof raw !== "string") return [];
+    return raw
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .slice(0, 50);
   }
 
   function getBuiltInSelectors() {
@@ -53,6 +72,11 @@
     if (!activeSelectorsEl) return;
     const builtIn = getBuiltInSelectors();
     const custom = getCustomSelectors(settings.customHideSelectors);
+    const aiButtonTexts = getTextPhrases(settings.aiButtonTexts);
+    const aiConsultationTexts = getTextPhrases(settings.aiConsultationTexts);
+    const popularSearchTexts = getTextPhrases(settings.popularSearchTexts);
+    const advertisingTexts = getTextPhrases(settings.advertisingTexts);
+    const quickFiltersTexts = getTextPhrases(settings.quickFiltersTexts);
 
     const lines = [
       "# Promo selectors (built-in)",
@@ -74,7 +98,22 @@
       ...builtIn.aiConsultation,
       "",
       "# Popular search chips selectors (built-in)",
-      ...builtIn.popularSearchChips
+      ...builtIn.popularSearchChips,
+      "",
+      "# Запасний пошук: кнопка AI",
+      ...aiButtonTexts,
+      "",
+      "# Запасний пошук: консультація AI",
+      ...aiConsultationTexts,
+      "",
+      "# Запасний пошук: популярні запити",
+      ...popularSearchTexts,
+      "",
+      "# Запасний пошук: реклама",
+      ...advertisingTexts,
+      "",
+      "# Запасний пошук: швидкі фільтри",
+      ...quickFiltersTexts
     ];
 
     if (custom.length) {
@@ -82,6 +121,22 @@
     }
 
     activeSelectorsEl.value = lines.join("\n");
+  }
+
+  function applySettingsToUI(settings) {
+    checkboxKeys.forEach((key) => {
+      const el = document.getElementById(key);
+      if (!el) return;
+      el.checked = Boolean(settings[key]);
+    });
+
+    textKeys.forEach((key) => {
+      const el = document.getElementById(key);
+      if (!el) return;
+      el.value = typeof settings[key] === "string" ? settings[key] : "";
+    });
+
+    renderActiveSelectors(settings);
   }
 
   function showStatus(text, variant = "success") {
@@ -156,12 +211,11 @@
 
   loadSettings().then((settings) => {
     currentSettings = settings;
-    renderActiveSelectors(currentSettings);
+    applySettingsToUI(currentSettings);
 
     checkboxKeys.forEach((key) => {
       const el = document.getElementById(key);
       if (!el) return;
-      el.checked = Boolean(currentSettings[key]);
       el.addEventListener("change", () => {
         currentSettings[key] = el.checked;
         scheduleSave(0);
@@ -171,13 +225,32 @@
     textKeys.forEach((key) => {
       const el = document.getElementById(key);
       if (!el) return;
-      el.value = typeof currentSettings[key] === "string" ? currentSettings[key] : "";
       el.addEventListener("input", () => {
         currentSettings[key] = el.value;
         renderActiveSelectors(currentSettings);
         scheduleSave(250);
       });
     });
+
+    if (resetFallbackBtn) {
+      resetFallbackBtn.addEventListener("click", () => {
+        FALLBACK_TEXT_KEYS.forEach((key) => {
+          currentSettings[key] = typeof DEFAULTS[key] === "string" ? DEFAULTS[key] : "";
+        });
+        applySettingsToUI(currentSettings);
+        scheduleSave(0);
+      });
+    }
+
+    if (resetAdvancedBtn) {
+      resetAdvancedBtn.addEventListener("click", () => {
+        ADVANCED_TEXT_KEYS.forEach((key) => {
+          currentSettings[key] = typeof DEFAULTS[key] === "string" ? DEFAULTS[key] : "";
+        });
+        applySettingsToUI(currentSettings);
+        scheduleSave(0);
+      });
+    }
   });
 
   document.addEventListener("visibilitychange", () => {

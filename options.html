@@ -12,71 +12,126 @@
         <img src="icons/icon48.png" alt="Rozetka Cleaner">
         <div>
           <h1>Rozetka Cleaner</h1>
-          <p>Налаштування елементів, які потрібно приховувати.</p>
+          <p>Увімкніть потрібні пункти, і зайві блоки зникнуть автоматично.</p>
         </div>
       </header>
 
       <section class="panel">
+        <h2 class="panel-title">Швидкі налаштування</h2>
         <label class="row">
           <input id="hidePromoBlocks" type="checkbox">
-          <span>Приховувати акційні ціни та блоки “Картка Rozetka”</span>
+          <span>Прибрати додаткову ціну “за Карткою Rozetka” в товарах</span>
         </label>
 
         <label class="row">
           <input id="hideRedBonusBlocks" type="checkbox">
-          <span>Приховувати блоки з бонусами за оплату Карткою Rozetka</span>
+          <span>Прибрати блоки “+ бонуси за оплату Карткою Rozetka”</span>
         </label>
 
         <label class="row">
           <input id="hideAdvertisingSections" type="checkbox">
-          <span>Приховувати рекламні каруселі та рекламні картки товарів</span>
+          <span>Прибрати рекламні каруселі та рекламні товарні картки</span>
         </label>
 
         <label class="row">
           <input id="hideQuickFilters" type="checkbox">
-          <span>Приховувати блок “Швидкі фільтри”</span>
+          <span>Прибрати блок “Швидкі фільтри”</span>
         </label>
 
         <label class="row">
           <input id="hideRozetkaAI" type="checkbox">
-          <span>Приховувати кнопку Rozetka AI</span>
+          <span>Прибрати кнопку Rozetka AI</span>
         </label>
 
         <label class="row">
           <input id="hideAiConsultationBlock" type="checkbox">
-          <span>Приховувати підказку “Потрібна консультація?”</span>
+          <span>Прибрати картку “Потрібна консультація?”</span>
         </label>
 
         <label class="row">
           <input id="hidePopularSearchChips" type="checkbox">
-          <span>Приховувати блок “Популярні запити” у пошуку</span>
+          <span>Прибрати блок “Популярні запити” у пошуку</span>
         </label>
 
         <label class="row">
           <input id="normalizePriceLayout" type="checkbox">
-          <span>Робити блок ціни в картках компактнішим і охайнішим</span>
+          <span>Зробити відображення ціни в картках більш компактним</span>
         </label>
       </section>
 
-      <section class="panel panel-text">
-        <label for="activeSelectors" class="textarea-label">Активні селектори (зараз використовується)</label>
-        <textarea
-          id="activeSelectors"
-          class="selectors-textarea selectors-textarea-readonly"
-          readonly
-        ></textarea>
-      </section>
+      <section class="panel panel-advanced">
+        <details class="advanced-details">
+          <summary>Розширені налаштування (для досвідчених)</summary>
+          <div class="advanced-body">
+            <p class="hint">
+              Використовуйте цей блок лише якщо після оновлення Rozetka щось перестало ховатися.
+            </p>
 
-      <section class="panel panel-text">
-        <label for="customHideSelectors" class="textarea-label">Додаткові CSS-селектори для приховування</label>
-        <textarea
-          id="customHideSelectors"
-          class="selectors-textarea"
-          placeholder="По одному селектору в рядок, наприклад:
+            <div class="actions">
+              <button id="resetFallbackTexts" type="button" class="btn">Скинути фрази пошуку</button>
+              <button id="resetAdvancedSettings" type="button" class="btn btn-secondary">Скинути всі розширені поля</button>
+            </div>
+
+            <label for="aiButtonTexts" class="textarea-label">Фрази для пошуку кнопки Rozetka AI</label>
+            <textarea
+              id="aiButtonTexts"
+              class="selectors-textarea fallback-textarea"
+              placeholder="По одній фразі в рядок, наприклад:
+rozetka ai"
+            ></textarea>
+
+            <label for="aiConsultationTexts" class="textarea-label">Фрази для блоку “Потрібна консультація?”</label>
+            <textarea
+              id="aiConsultationTexts"
+              class="selectors-textarea fallback-textarea"
+              placeholder="По одній фразі в рядок, наприклад:
+потрібна консультація
+ai-помічник"
+            ></textarea>
+
+            <label for="popularSearchTexts" class="textarea-label">Фрази для блоку “Популярні запити”</label>
+            <textarea
+              id="popularSearchTexts"
+              class="selectors-textarea fallback-textarea"
+              placeholder="По одній фразі в рядок, наприклад:
+популярні запити"
+            ></textarea>
+
+            <label for="advertisingTexts" class="textarea-label">Фрази для рекламних блоків</label>
+            <textarea
+              id="advertisingTexts"
+              class="selectors-textarea fallback-textarea"
+              placeholder="По одній фразі в рядок, наприклад:
+реклама"
+            ></textarea>
+
+            <label for="quickFiltersTexts" class="textarea-label">Фрази для блоку “Швидкі фільтри”</label>
+            <textarea
+              id="quickFiltersTexts"
+              class="selectors-textarea fallback-textarea"
+              placeholder="По одній фразі в рядок, наприклад:
+швидкі фільтри"
+            ></textarea>
+            <p class="hint">Ці фрази потрібні як запасний варіант, якщо звичайні правила не спрацювали.</p>
+
+            <label for="customHideSelectors" class="textarea-label">Додаткові CSS-селектори для приховування</label>
+            <textarea
+              id="customHideSelectors"
+              class="selectors-textarea"
+              placeholder="По одному селектору в рядок, наприклад:
 rz-some-new-banner
 .promo-badge"
-        ></textarea>
-        <p class="hint">Після зміни оновіть сторінку Rozetka.</p>
+            ></textarea>
+            <p class="hint">Після зміни оновіть сторінку Rozetka.</p>
+
+            <label for="activeSelectors" class="textarea-label">Технічні правила, які зараз використовуються</label>
+            <textarea
+              id="activeSelectors"
+              class="selectors-textarea selectors-textarea-readonly"
+              readonly
+            ></textarea>
+          </div>
+        </details>
       </section>
 
       <p id="status" class="status" aria-live="polite"></p>

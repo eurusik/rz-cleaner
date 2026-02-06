@@ -14,6 +14,11 @@
       hideAiConsultationBlock: true,
       hidePopularSearchChips: true,
       normalizePriceLayout: true,
+      aiButtonTexts: "rozetka ai",
+      aiConsultationTexts: "потрібна консультація\nai-помічник",
+      popularSearchTexts: "популярні запити",
+      advertisingTexts: "реклама",
+      quickFiltersTexts: "швидкі фільтри",
       customHideSelectors: ""
     },
     selectors: {

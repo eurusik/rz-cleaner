@@ -111,6 +111,21 @@
     }
   }
 
+  function getTextList(raw, limit = 50) {
+    if (typeof raw !== "string") return [];
+    return raw
+      .split(/\r?\n/)
+      .map((line) => line.trim().toLowerCase())
+      .filter(Boolean)
+      .slice(0, limit);
+  }
+
+  function textContainsAny(text, list) {
+    if (!text || !list || !list.length) return false;
+    const normalized = String(text).toLowerCase();
+    return list.some((needle) => normalized.includes(needle));
+  }
+
   function markInternalStyleWrite(el) {
     if (!el || el.nodeType !== Node.ELEMENT_NODE) return;
     const prevCount = internalStyleWriteCounts.get(el) || 0;
@@ -302,8 +317,13 @@
     if (!settings.hideAdvertisingSections) return;
     const scope = root && root.querySelectorAll ? root : document;
     const matchedBySelectors = hideRuleSelectors(root, advertisingRules(), FEATURE.ADVERTISING);
-    const adTileWrappers = safeQueryAll(scope, "div.item > rz-product-tile, li > rz-product-tile, [rzscrollslideritem] > rz-product-tile, [data-testid='section-slide'] > rz-product-tile");
-    adTileWrappers.forEach((tile) => {
+
+    // Promote already-hidden ad tiles to their outer grid wrappers to avoid empty gaps.
+    const markedAdTiles = safeQueryAll(
+      scope,
+      `rz-product-tile[${HIDDEN_FEATURES_ATTR}*="${FEATURE.ADVERTISING}"]`
+    );
+    markedAdTiles.forEach((tile) => {
       const featureSet = parseFeatureSet(tile);
       if (!featureSet.has(FEATURE.ADVERTISING)) return;
       const wrapper = tile.closest("div.item, [rzscrollslideritem], [data-testid='section-slide'], li");
@@ -311,22 +331,19 @@
     });
     if (matchedBySelectors) return;
 
-    if (scope !== document) {
-      const text = (scope.textContent || "").toLowerCase();
-      if (!text.includes("реклама")) return;
-    }
+    if (scope !== document && !textContainsAny(scope.textContent || "", settings.advertisingTextList)) return;
 
     const sectionTitles = safeQueryAll(scope, "rz-section-slider .title, rz-section-slider h2");
     sectionTitles.forEach((el) => {
       const text = (el.textContent || "").trim().toLowerCase();
-      if (text !== "реклама") return;
+      if (!textContainsAny(text, settings.advertisingTextList)) return;
       hideElement(el.closest("rz-section-slider"), FEATURE.ADVERTISING);
     });
 
     const adInfoNodes = safeQueryAll(scope, "rz-product-tile rz-tile-info, rz-tile-info");
     adInfoNodes.forEach((el) => {
       const text = (el.textContent || "").trim().toLowerCase();
-      if (!text.includes("реклама")) return;
+      if (!textContainsAny(text, settings.advertisingTextList)) return;
       const wrapper = el.closest("div.item, [rzscrollslideritem], [data-testid='section-slide'], li");
       hideElement(wrapper || el.closest("rz-product-tile"), FEATURE.ADVERTISING);
     });
@@ -346,15 +363,12 @@
     const matchedBySelectors = hideRuleSelectors(root, quickFiltersRules(), FEATURE.QUICK_FILTERS);
     if (matchedBySelectors) return;
 
-    if (scope !== document) {
-      const text = (scope.textContent || "").toLowerCase();
-      if (!text.includes("швидкі фільтри")) return;
-    }
+    if (scope !== document && !textContainsAny(scope.textContent || "", settings.quickFiltersTextList)) return;
 
     const sectionTitles = safeQueryAll(scope, "rz-product-anchor-links .title, rz-product-anchor-links h2");
     sectionTitles.forEach((el) => {
       const text = (el.textContent || "").trim().toLowerCase();
-      if (!text.includes("швидкі фільтри")) return;
+      if (!textContainsAny(text, settings.quickFiltersTextList)) return;
       hideElement(el.closest("rz-product-anchor-links"), FEATURE.QUICK_FILTERS);
     });
   }
@@ -370,12 +384,12 @@
     );
 
     if (matchedBySelectors) return;
-    if (scope !== document && !(scope.textContent || "").toLowerCase().includes("rozetka ai")) return;
+    if (scope !== document && !textContainsAny(scope.textContent || "", settings.aiButtonTextList)) return;
 
     const textNodes = safeQueryAll(scope, SELECTORS.aiTextNodes || "button, a, div, span");
     textNodes.forEach((el) => {
       const text = (el.textContent || "").trim().toLowerCase();
-      if (!text.includes("rozetka ai")) return;
+      if (!textContainsAny(text, settings.aiButtonTextList)) return;
 
       const style = window.getComputedStyle(el);
       const isFloating =
@@ -402,18 +416,12 @@
 
     if (matchedBySelectors) return;
 
-    if (scope !== document) {
-      const text = (scope.textContent || "").toLowerCase();
-      if (!text.includes("потрібна консультація") && !text.includes("ai-помічник")) return;
-    }
+    if (scope !== document && !textContainsAny(scope.textContent || "", settings.aiConsultationTextList)) return;
 
     const textNodes = safeQueryAll(scope, SELECTORS.aiTextNodes || "button, a, div, span");
     textNodes.forEach((el) => {
       const text = (el.textContent || "").trim().toLowerCase();
-      const consultation =
-        text.includes("потрібна консультація") ||
-        text.includes("ai-помічник");
-      if (!consultation) return;
+      if (!textContainsAny(text, settings.aiConsultationTextList)) return;
       hideElement(el, FEATURE.AI_CONSULT);
       hideElement(el.closest("rz-chat-bot-button-placeholder"), FEATURE.AI_CONSULT);
     });
@@ -426,15 +434,12 @@
 
     if (matchedBySelectors) return;
 
-    if (scope !== document) {
-      const text = (scope.textContent || "").toLowerCase();
-      if (!text.includes("популярні запити")) return;
-    }
+    if (scope !== document && !textContainsAny(scope.textContent || "", settings.popularSearchTextList)) return;
 
     const textNodes = safeQueryAll(scope, "div, p, span, h2, h3, h4");
     textNodes.forEach((el) => {
       const text = (el.textContent || "").trim().toLowerCase();
-      if (!text.includes("популярні запити")) return;
+      if (!textContainsAny(text, settings.popularSearchTextList)) return;
 
       const parent = el.parentElement;
       if (parent && safeQueryAll(parent, "rz-tag-list, .tags-list").length) {
@@ -634,7 +639,17 @@
   function normalizeSettings(raw) {
     const merged = { ...DEFAULTS, ...(raw || {}) };
     merged.customHideSelectors = typeof merged.customHideSelectors === "string" ? merged.customHideSelectors : "";
+    merged.aiButtonTexts = typeof merged.aiButtonTexts === "string" ? merged.aiButtonTexts : "";
+    merged.aiConsultationTexts = typeof merged.aiConsultationTexts === "string" ? merged.aiConsultationTexts : "";
+    merged.popularSearchTexts = typeof merged.popularSearchTexts === "string" ? merged.popularSearchTexts : "";
+    merged.advertisingTexts = typeof merged.advertisingTexts === "string" ? merged.advertisingTexts : "";
+    merged.quickFiltersTexts = typeof merged.quickFiltersTexts === "string" ? merged.quickFiltersTexts : "";
     merged.customHideSelectorList = getCustomSelectors(merged.customHideSelectors);
+    merged.aiButtonTextList = getTextList(merged.aiButtonTexts);
+    merged.aiConsultationTextList = getTextList(merged.aiConsultationTexts);
+    merged.popularSearchTextList = getTextList(merged.popularSearchTexts);
+    merged.advertisingTextList = getTextList(merged.advertisingTexts);
+    merged.quickFiltersTextList = getTextList(merged.quickFiltersTexts);
     return merged;
   }
 
@@ -681,6 +696,21 @@
     }
     if (prevSettings.customHideSelectors !== nextSettings.customHideSelectors) {
       removeFeatureFromAll(document, FEATURE.CUSTOM);
+    }
+    if (prevSettings.aiButtonTexts !== nextSettings.aiButtonTexts) {
+      removeFeatureFromAll(document, FEATURE.AI_BUTTON);
+    }
+    if (prevSettings.aiConsultationTexts !== nextSettings.aiConsultationTexts) {
+      removeFeatureFromAll(document, FEATURE.AI_CONSULT);
+    }
+    if (prevSettings.popularSearchTexts !== nextSettings.popularSearchTexts) {
+      removeFeatureFromAll(document, FEATURE.POPULAR_SEARCH_CHIPS);
+    }
+    if (prevSettings.advertisingTexts !== nextSettings.advertisingTexts) {
+      removeFeatureFromAll(document, FEATURE.ADVERTISING);
+    }
+    if (prevSettings.quickFiltersTexts !== nextSettings.quickFiltersTexts) {
+      removeFeatureFromAll(document, FEATURE.QUICK_FILTERS);
     }
   }
 
