@@ -68,8 +68,14 @@
             </p>
 
             <div class="actions">
-              <button id="resetFallbackTexts" type="button" class="btn">Скинути фрази пошуку</button>
-              <button id="resetAdvancedSettings" type="button" class="btn btn-secondary">Скинути всі розширені поля</button>
+              <div class="action-item">
+                <button id="resetFallbackTexts" type="button" class="btn">Скинути тільки фрази пошуку</button>
+                <p class="action-note">Повертає стандартні фрази у 5 полях нижче.</p>
+              </div>
+              <div class="action-item">
+                <button id="resetCustomSelectors" type="button" class="btn btn-secondary">Очистити тільки CSS-селектори</button>
+                <p class="action-note">Очищає лише поле “Додаткові CSS-селектори”.</p>
+              </div>
             </div>
 
             <label for="aiButtonTexts" class="textarea-label">Фрази для пошуку кнопки Rozetka AI</label>

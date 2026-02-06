@@ -12,12 +12,12 @@
     "advertisingTexts",
     "quickFiltersTexts"
   ].filter((key) => key in DEFAULTS);
-  const ADVANCED_TEXT_KEYS = [...FALLBACK_TEXT_KEYS, "customHideSelectors"].filter((key) => key in DEFAULTS);
+  const CUSTOM_SELECTOR_KEY = "customHideSelectors";
 
   const statusEl = document.getElementById("status");
   const activeSelectorsEl = document.getElementById("activeSelectors");
   const resetFallbackBtn = document.getElementById("resetFallbackTexts");
-  const resetAdvancedBtn = document.getElementById("resetAdvancedSettings");
+  const resetCustomSelectorsBtn = document.getElementById("resetCustomSelectors");
   const checkboxKeys = Object.keys(DEFAULTS).filter((k) => typeof DEFAULTS[k] === "boolean");
   const textKeys = Object.keys(DEFAULTS).filter((k) => typeof DEFAULTS[k] === "string");
   let statusTimer = 0;
@@ -242,11 +242,10 @@
       });
     }
 
-    if (resetAdvancedBtn) {
-      resetAdvancedBtn.addEventListener("click", () => {
-        ADVANCED_TEXT_KEYS.forEach((key) => {
-          currentSettings[key] = typeof DEFAULTS[key] === "string" ? DEFAULTS[key] : "";
-        });
+    if (resetCustomSelectorsBtn) {
+      resetCustomSelectorsBtn.addEventListener("click", () => {
+        currentSettings[CUSTOM_SELECTOR_KEY] =
+          typeof DEFAULTS[CUSTOM_SELECTOR_KEY] === "string" ? DEFAULTS[CUSTOM_SELECTOR_KEY] : "";
         applySettingsToUI(currentSettings);
         scheduleSave(0);
       });

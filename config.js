@@ -40,9 +40,9 @@
         { query: 'rz-section-slider[data-testid="advertising-slider"]' },
         { query: "rz-section-slider.advertising-slider-theme" },
         { query: "rz-section-slider rz-advertising-info-btn", closest: "rz-section-slider" },
-        { query: "rz-product-tile a[rel~='sponsored']", closest: "div.item, [rzscrollslideritem], [data-testid='section-slide'], li" },
-        { query: "rz-product-tile a[href*='advToken=']", closest: "div.item, [rzscrollslideritem], [data-testid='section-slide'], li" },
-        { query: "rz-product-tile a[href*='advSource=']", closest: "div.item, [rzscrollslideritem], [data-testid='section-slide'], li" }
+        { query: "rz-product-tile a[rel~='sponsored']", closest: "div.item, [rzscrollslideritem], [data-testid='section-slide'], li, rz-product-tile" },
+        { query: "rz-product-tile a[href*='advToken=']", closest: "div.item, [rzscrollslideritem], [data-testid='section-slide'], li, rz-product-tile" },
+        { query: "rz-product-tile a[href*='advSource=']", closest: "div.item, [rzscrollslideritem], [data-testid='section-slide'], li, rz-product-tile" }
       ],
       quickFilters: [
         { query: "rz-product-anchor-links" },

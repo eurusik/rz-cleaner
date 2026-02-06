@@ -318,17 +318,26 @@
     const scope = root && root.querySelectorAll ? root : document;
     const matchedBySelectors = hideRuleSelectors(root, advertisingRules(), FEATURE.ADVERTISING);
 
-    // Promote already-hidden ad tiles to their outer grid wrappers to avoid empty gaps.
-    const markedAdTiles = safeQueryAll(
-      scope,
-      `rz-product-tile[${HIDDEN_FEATURES_ATTR}*="${FEATURE.ADVERTISING}"]`
-    );
-    markedAdTiles.forEach((tile) => {
-      const featureSet = parseFeatureSet(tile);
-      if (!featureSet.has(FEATURE.ADVERTISING)) return;
-      const wrapper = tile.closest("div.item, [rzscrollslideritem], [data-testid='section-slide'], li");
-      if (wrapper) hideElement(wrapper, FEATURE.ADVERTISING);
-    });
+    function getAdCardContainer(node) {
+      if (!node || node.nodeType !== Node.ELEMENT_NODE) return null;
+      const wrapper = node.closest("div.item, [rzscrollslideritem], [data-testid='section-slide'], li");
+      if (wrapper) return wrapper;
+      return node.closest("rz-product-tile");
+    }
+
+    function promoteAdNodesToCardContainers() {
+      // If any descendant was hidden as ad, hide the whole card wrapper/tile as well.
+      // This prevents "broken" cards where image/title is gone but price remains.
+      const markedAdNodes = safeQueryAll(scope, `[${HIDDEN_FEATURES_ATTR}*="${FEATURE.ADVERTISING}"]`);
+      markedAdNodes.forEach((node) => {
+        const featureSet = parseFeatureSet(node);
+        if (!featureSet.has(FEATURE.ADVERTISING)) return;
+        const container = getAdCardContainer(node);
+        if (container) hideElement(container, FEATURE.ADVERTISING);
+      });
+    }
+
+    promoteAdNodesToCardContainers();
     if (matchedBySelectors) return;
 
     if (scope !== document && !textContainsAny(scope.textContent || "", settings.advertisingTextList)) return;
@@ -344,8 +353,7 @@
     adInfoNodes.forEach((el) => {
       const text = (el.textContent || "").trim().toLowerCase();
       if (!textContainsAny(text, settings.advertisingTextList)) return;
-      const wrapper = el.closest("div.item, [rzscrollslideritem], [data-testid='section-slide'], li");
-      hideElement(wrapper || el.closest("rz-product-tile"), FEATURE.ADVERTISING);
+      hideElement(getAdCardContainer(el), FEATURE.ADVERTISING);
     });
 
     const sponsoredLinks = safeQueryAll(
@@ -353,8 +361,10 @@
       "rz-product-tile a[rel~='sponsored'], rz-product-tile a[href*='advToken='], rz-product-tile a[href*='advSource=']"
     );
     sponsoredLinks.forEach((el) => {
-      hideElement(el.closest("div.item, [rzscrollslideritem], [data-testid='section-slide'], li, rz-product-tile"), FEATURE.ADVERTISING);
+      hideElement(getAdCardContainer(el), FEATURE.ADVERTISING);
     });
+
+    promoteAdNodesToCardContainers();
   }
 
   function hideQuickFilters(root, settings) {
