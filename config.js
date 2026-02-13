@@ -13,6 +13,8 @@
       hideRozetkaAI: true,
       hideAiConsultationBlock: true,
       hidePopularSearchChips: true,
+      hideSmartDeliveryBadge: true,
+      hideEmailSubscriptionBanner: true,
       normalizePriceLayout: true,
       aiButtonTexts: "rozetka ai",
       aiConsultationTexts: "потрібна консультація\nai-помічник",
@@ -68,6 +70,51 @@
         { query: "div.md\\:order-1 rz-tag-list.max-three-rows", closest: "div.md\\:order-1" },
         { query: "div.md\\:order-1 rz-tag-list .tags-list", closest: "div.md\\:order-1" },
         { query: "rz-tag-list.max-three-rows", closest: "div.md\\:order-1" }
+      ],
+      smartDeliveryBadge: [
+        {
+          query: "rz-product-tile use[href*='#icon-premium-smart']",
+          closest: "div.d-flex.gap-1.items-center.text-xs.color-green"
+        },
+        {
+          query: "rz-product-tile rz-smart-description-button",
+          closest: "div.d-flex.gap-1.items-center.text-xs.color-green"
+        },
+        {
+          query: "rz-product-tile .tile-smart-icon",
+          closest: "div.d-flex.gap-1.items-center.text-xs.color-green"
+        },
+        {
+          query: "rz-delivery-premium",
+          closest: "rz-delivery-premium"
+        },
+        {
+          query: "rz-delivery-premium .premium--title",
+          closest: "rz-delivery-premium"
+        },
+        {
+          query: "rz-delivery-premium use[href*='#icon-premium-smart']",
+          closest: "rz-delivery-premium"
+        },
+        {
+          query: "rz-delivery-price use[href*='#icon-premium-smart']",
+          closest: "rz-delivery-price"
+        },
+        {
+          query: "rz-delivery-price svg use[href*='#icon-premium-smart']",
+          closest: "rz-delivery-price"
+        }
+      ],
+      emailSubscriptionBanner: [
+        { query: "rz-marketing-subscription-banner" },
+        {
+          query: "rz-marketing-subscription-banner .content",
+          closest: "rz-marketing-subscription-banner"
+        },
+        {
+          query: "rz-marketing-subscription-banner rz-modal-close-btn",
+          closest: "rz-marketing-subscription-banner"
+        }
       ],
       aiTextNodes: "button, a, div, span"
     }

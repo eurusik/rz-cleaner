@@ -20,6 +20,8 @@
     AI_BUTTON: "ai-button",
     AI_CONSULT: "ai-consultation",
     POPULAR_SEARCH_CHIPS: "popular-search-chips",
+    SMART_DELIVERY_BADGE: "smart-delivery-badge",
+    EMAIL_SUBSCRIPTION_BANNER: "email-subscription-banner",
     CUSTOM: "custom"
   };
 
@@ -46,6 +48,10 @@
     "rz-tile-info",
     "rz-chat-bot-button-assist",
     "rz-chat-bot-button-placeholder",
+    "rz-smart-description-button",
+    "rz-delivery-premium",
+    "rz-delivery-price",
+    "rz-marketing-subscription-banner",
     "rz-tag-list",
     '[data-testid="advertising-slider"]',
     '[data-testid="promo-price"]',
@@ -55,6 +61,8 @@
     ".loyalty__red-card",
     ".advertising-slider-theme",
     ".product-anchor-links__list-wrapper",
+    ".tile-smart-icon",
+    ".premium--title",
     ".tags-list"
   ].join(", ");
   const HINT_TAGS = new Set([
@@ -68,6 +76,10 @@
     "RZ-TILE-INFO",
     "RZ-CHAT-BOT-BUTTON-ASSIST",
     "RZ-CHAT-BOT-BUTTON-PLACEHOLDER",
+    "RZ-SMART-DESCRIPTION-BUTTON",
+    "RZ-DELIVERY-PREMIUM",
+    "RZ-DELIVERY-PRICE",
+    "RZ-MARKETING-SUBSCRIPTION-BANNER",
     "RZ-TAG-LIST"
   ]);
   const HINT_CLASSES = [
@@ -77,6 +89,8 @@
     "loyalty__red-card",
     "advertising-slider-theme",
     "product-anchor-links__list-wrapper",
+    "tile-smart-icon",
+    "premium--title",
     "tags-list",
     "max-three-rows"
   ];
@@ -306,6 +320,14 @@
     return SELECTORS.popularSearchChips || [];
   }
 
+  function smartDeliveryBadgeRules() {
+    return SELECTORS.smartDeliveryBadge || [];
+  }
+
+  function emailSubscriptionBannerRules() {
+    return SELECTORS.emailSubscriptionBanner || [];
+  }
+
   function countUniqueMatchesByRules(scope, rules) {
     const nodes = new Set();
     rules.forEach((rule) => {
@@ -383,6 +405,18 @@
         enabled: Boolean(settings.hidePopularSearchChips),
         selectorMatches: countUniqueMatchesByRules(scope, popularSearchChipsRules()),
         textMatch: hasTextFallbackSignal(pageText, settings.popularSearchTextList)
+      },
+      {
+        id: FEATURE.SMART_DELIVERY_BADGE,
+        enabled: Boolean(settings.hideSmartDeliveryBadge),
+        selectorMatches: countUniqueMatchesByRules(scope, smartDeliveryBadgeRules()),
+        textMatch: null
+      },
+      {
+        id: FEATURE.EMAIL_SUBSCRIPTION_BANNER,
+        enabled: Boolean(settings.hideEmailSubscriptionBanner),
+        selectorMatches: countUniqueMatchesByRules(scope, emailSubscriptionBannerRules()),
+        textMatch: null
       },
       {
         id: FEATURE.CUSTOM,
@@ -612,6 +646,16 @@
     });
   }
 
+  function hideSmartDeliveryBadge(root, settings) {
+    if (!settings.hideSmartDeliveryBadge) return;
+    hideRuleSelectors(root, smartDeliveryBadgeRules(), FEATURE.SMART_DELIVERY_BADGE);
+  }
+
+  function hideEmailSubscriptionBanner(root, settings) {
+    if (!settings.hideEmailSubscriptionBanner) return;
+    hideRuleSelectors(root, emailSubscriptionBannerRules(), FEATURE.EMAIL_SUBSCRIPTION_BANNER);
+  }
+
   function runCleanup(root, settings) {
     hidePromoPrices(root, settings);
     hideRedBonusBlocks(root, settings);
@@ -620,6 +664,8 @@
     hideRozetkaAIWidget(root, settings);
     hideAiConsultationBlock(root, settings);
     hidePopularSearchChips(root, settings);
+    hideSmartDeliveryBadge(root, settings);
+    hideEmailSubscriptionBanner(root, settings);
     hideCustomSelectors(root, settings);
     scheduleDiagnostics(settings);
   }
@@ -856,6 +902,12 @@
     }
     if (prevSettings.hidePopularSearchChips && !nextSettings.hidePopularSearchChips) {
       removeFeatureFromAll(document, FEATURE.POPULAR_SEARCH_CHIPS);
+    }
+    if (prevSettings.hideSmartDeliveryBadge && !nextSettings.hideSmartDeliveryBadge) {
+      removeFeatureFromAll(document, FEATURE.SMART_DELIVERY_BADGE);
+    }
+    if (prevSettings.hideEmailSubscriptionBanner && !nextSettings.hideEmailSubscriptionBanner) {
+      removeFeatureFromAll(document, FEATURE.EMAIL_SUBSCRIPTION_BANNER);
     }
     if (prevSettings.customHideSelectors !== nextSettings.customHideSelectors) {
       removeFeatureFromAll(document, FEATURE.CUSTOM);

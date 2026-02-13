@@ -33,6 +33,8 @@
     "ai-button": "Кнопка Rozetka AI",
     "ai-consultation": "Картка “Потрібна консультація?”",
     "popular-search-chips": "Блок “Популярні запити”",
+    "smart-delivery-badge": "Smart-блоки (бейдж + підписка Smart)",
+    "email-subscription-banner": "Банер підписки на email",
     custom: "Додаткові CSS-селектори"
   };
   const FEATURE_SETTING_KEYS = {
@@ -43,6 +45,8 @@
     "ai-button": "hideRozetkaAI",
     "ai-consultation": "hideAiConsultationBlock",
     "popular-search-chips": "hidePopularSearchChips",
+    "smart-delivery-badge": "hideSmartDeliveryBadge",
+    "email-subscription-banner": "hideEmailSubscriptionBanner",
     custom: "customHideSelectors"
   };
   let statusTimer = 0;
@@ -244,8 +248,24 @@
     const popularSearchChips = (SELECTORS.popularSearchChips || [])
       .map((rule) => (rule && rule.query ? rule.query : ""))
       .filter(Boolean);
+    const smartDeliveryBadge = (SELECTORS.smartDeliveryBadge || [])
+      .map((rule) => (rule && rule.query ? rule.query : ""))
+      .filter(Boolean);
+    const emailSubscriptionBanner = (SELECTORS.emailSubscriptionBanner || [])
+      .map((rule) => (rule && rule.query ? rule.query : ""))
+      .filter(Boolean);
 
-    return { promoMain, redBonus, advertising, quickFilters, aiButton, aiConsultation, popularSearchChips };
+    return {
+      promoMain,
+      redBonus,
+      advertising,
+      quickFilters,
+      aiButton,
+      aiConsultation,
+      popularSearchChips,
+      smartDeliveryBadge,
+      emailSubscriptionBanner
+    };
   }
 
   function renderActiveSelectors(settings) {
@@ -279,6 +299,12 @@
       "",
       "# Popular search chips selectors (built-in)",
       ...builtIn.popularSearchChips,
+      "",
+      "# Smart delivery badge selectors (built-in)",
+      ...builtIn.smartDeliveryBadge,
+      "",
+      "# Email subscription banner selectors (built-in)",
+      ...builtIn.emailSubscriptionBanner,
       "",
       "# Запасний пошук: кнопка AI",
       ...aiButtonTexts,
