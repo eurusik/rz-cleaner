@@ -1,12 +1,8 @@
 # Rozetka Cleaner
 
-Rozetka Cleaner — це просте розширення для Chrome, яке робить сторінки Rozetka чистішими та спокійнішими.
+Rozetka Cleaner (Unofficial) — це просте розширення для Chrome, яке робить сторінки Rozetka чистішими та спокійнішими.
 
 Воно прибирає зайві промо-блоки, рекламу і частину відволікаючих елементів, щоб вам було легше зосередитися на товарі, ціні та характеристиках.
-
-<p align="center">
-  <img src="assets/logo-source.png" alt="Rozetka Cleaner Logo" width="280">
-</p>
 
 ## Для кого це
 
@@ -24,7 +20,7 @@ Rozetka Cleaner — це просте розширення для Chrome, яке
 - зробити перегляд каталогу та товарних карток зручнішим.
 
 <p align="center">
-  <img src="assets/rzc-intro.gif" alt="Rozetka Cleaner feature preview" width="640">
+  <img src="assets/rzc-intro.gif" alt="Демонстрація роботи розширення в каталозі" width="640">
   <br>
   <sub>Приклад: чистіший каталог без зайвих елементів</sub>
 </p>
@@ -45,7 +41,7 @@ Rozetka Cleaner — це просте розширення для Chrome, яке
 3. Увімкніть тільки ті пункти, які вам потрібні.
 
 <p align="center">
-  <img src="assets/options.jpeg" alt="Сторінка налаштувань Rozetka Cleaner" width="560">
+  <img src="assets/options.jpeg" alt="Сторінка налаштувань розширення" width="560">
   <br>
   <sub>Усі налаштування — у простих перемикачах</sub>
 </p>

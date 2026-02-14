@@ -3,7 +3,7 @@
   "name": "Rozetka Cleaner",
   "short_name": "RZ Cleaner",
   "version": "1.6.2",
-  "description": "Hide Rozetka promo blocks and normalize product card prices.",
+  "description": "Unofficial extension for cleaner Rozetka catalog pages: hides promo blocks and normalizes product card prices.",
   "minimum_chrome_version": "114",
   "permissions": [
     "storage",
