@@ -69,3 +69,61 @@ test('options updates diagnostics summary when local storage change arrives', as
   const summary = harness.getById('diagnosticsSummary');
   assert.ok(summary.textContent.includes('варто перевірити'));
 });
+
+test('options saves global enabled toggle', async () => {
+  const harness = createHarness({ syncSettings: { enabled: true } });
+  await harness.runOptions();
+
+  const enabledToggle = harness.getById('extensionEnabled');
+  assert.equal(enabledToggle.checked, true);
+
+  enabledToggle.checked = false;
+  enabledToggle.dispatch('change');
+
+  const lastCall = harness.syncSetCalls[harness.syncSetCalls.length - 1];
+  assert.equal(lastCall.rzc_settings.enabled, false);
+});
+
+test('recommended settings button enables extension and applies defaults', async () => {
+  const harness = createHarness({
+    syncSettings: {
+      enabled: false,
+      hideAdvertisingSections: false,
+      hideSmartDeliveryBadge: false
+    }
+  });
+  await harness.runOptions();
+
+  const button = harness.getById('applyRecommendedSettings');
+  button.dispatch('click');
+
+  const lastCall = harness.syncSetCalls[harness.syncSetCalls.length - 1];
+  assert.equal(lastCall.rzc_settings.enabled, true);
+  assert.equal(lastCall.rzc_settings.hideAdvertisingSections, true);
+  assert.equal(lastCall.rzc_settings.hideSmartDeliveryBadge, true);
+});
+
+test('run diagnostics now opens diagnostics section', async () => {
+  const harness = createHarness({ diagnostics: { features: [], updatedAt: Date.now() } });
+  await harness.runOptions();
+
+  assert.equal(harness.diagnosticsDetails.open, false);
+  const runBtn = harness.getById('runDiagnosticsNow');
+  runBtn.dispatch('click');
+  assert.equal(harness.diagnosticsDetails.open, true);
+});
+
+test('copy active selectors copies text and shows local status badge', async () => {
+  const harness = createHarness();
+  await harness.runOptions();
+
+  const activeSelectors = harness.getById('activeSelectors');
+  activeSelectors.value = 'rz-product-tile\\n.red-label';
+  const copyBtn = harness.getById('copyActiveSelectors');
+  await copyBtn.dispatch('click');
+
+  assert.equal(harness.getCopiedText(), 'rz-product-tile\\n.red-label');
+  const copyStatus = harness.getById('copyActiveSelectorsStatus');
+  assert.equal(copyStatus.textContent, 'Скопійовано');
+  assert.equal(copyStatus.classList.contains('visible'), true);
+});

@@ -2,12 +2,16 @@
   "manifest_version": 3,
   "name": "Rozetka Cleaner",
   "short_name": "RZ Cleaner",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Hide Rozetka promo blocks and normalize product card prices.",
   "minimum_chrome_version": "114",
   "permissions": [
     "storage"
   ],
+  "action": {
+    "default_title": "Rozetka Cleaner",
+    "default_popup": "popup.html"
+  },
   "options_page": "options.html",
   "icons": {
     "16": "icons/icon16.png",

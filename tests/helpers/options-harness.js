@@ -43,6 +43,8 @@ class FakeElement {
     this.textContent = '';
     this.innerHTML = '';
     this.className = '';
+    this.disabled = false;
+    this.style = {};
     this.classList = new FakeClassList();
     this.children = [];
     this.listeners = new Map();
@@ -56,7 +58,8 @@ class FakeElement {
 
   dispatch(type) {
     const arr = this.listeners.get(type) || [];
-    arr.forEach((cb) => cb());
+    const results = arr.map((cb) => cb());
+    return Promise.all(results.map((item) => Promise.resolve(item)));
   }
 
   appendChild(child) {
@@ -70,6 +73,7 @@ function createHarness({ syncSettings = {}, diagnostics = null } = {}) {
   const byId = new Map();
   const onChangedListeners = [];
   const syncSetCalls = [];
+  let copiedText = '';
   let timerId = 0;
 
   const defaultsSandbox = { globalThis: {} };
@@ -95,6 +99,16 @@ function createHarness({ syncSettings = {}, diagnostics = null } = {}) {
   ensure('diagnosticsMeta');
   ensure('diagnosticsList', 'ul');
   ensure('refreshDiagnostics', 'button');
+  ensure('extensionEnabled', 'input');
+  ensure('applyRecommendedSettings', 'button');
+  ensure('runDiagnosticsNow', 'button');
+  ensure('copyActiveSelectors', 'button');
+  ensure('copyActiveSelectorsStatus');
+  const quickPanel = new FakeElement('section');
+  quickPanel.className = 'panel';
+  const diagnosticsDetails = new FakeElement('details');
+  diagnosticsDetails.className = 'advanced-details diagnostics-details';
+  diagnosticsDetails.open = false;
 
   const document = {
     getElementById(id) {
@@ -102,6 +116,15 @@ function createHarness({ syncSettings = {}, diagnostics = null } = {}) {
     },
     createElement(tag) {
       return new FakeElement(tag);
+    },
+    querySelector(selector) {
+      if (selector === '.panel') return quickPanel;
+      if (selector === '.diagnostics-details') return diagnosticsDetails;
+      return null;
+    },
+    body: new FakeElement('body'),
+    execCommand() {
+      return false;
     },
     addEventListener(type, cb) {
       const arr = docListeners.get(type) || [];
@@ -112,9 +135,9 @@ function createHarness({ syncSettings = {}, diagnostics = null } = {}) {
   };
 
   const window = {
-    setTimeout(cb) {
+    setTimeout(cb, delay = 0) {
       timerId += 1;
-      cb();
+      if (delay <= 300) cb();
       return timerId;
     },
     clearTimeout() {},
@@ -150,7 +173,16 @@ function createHarness({ syncSettings = {}, diagnostics = null } = {}) {
     runtime: { lastError: null }
   };
 
-  const sandbox = { console, document, window, chrome, globalThis: {} };
+  const navigator = {
+    clipboard: {
+      async writeText(text) {
+        copiedText = String(text);
+      }
+    }
+  };
+
+  const sandbox = { console, document, window, chrome, navigator };
+  sandbox.globalThis = sandbox;
   vm.createContext(sandbox);
   vm.runInContext(CONFIG_SOURCE, sandbox);
 
@@ -173,7 +205,9 @@ function createHarness({ syncSettings = {}, diagnostics = null } = {}) {
 
   return {
     getById: (id) => byId.get(id),
+    diagnosticsDetails,
     syncSetCalls,
+    getCopiedText: () => copiedText,
     runOptions,
     emitLocalDiagnostics
   };

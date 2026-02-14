@@ -14,6 +14,11 @@ function mustContainIn(text, snippet, name) {
 test('options.html has toggles for smart and email features', () => {
   mustContainIn(html, 'id="hideSmartDeliveryBadge"', 'options.html');
   mustContainIn(html, 'id="hideEmailSubscriptionBanner"', 'options.html');
+  mustContainIn(html, 'id="extensionEnabled"', 'options.html');
+  mustContainIn(html, 'id="applyRecommendedSettings"', 'options.html');
+  mustContainIn(html, 'id="runDiagnosticsNow"', 'options.html');
+  mustContainIn(html, 'id="copyActiveSelectorsStatus"', 'options.html');
+  mustContainIn(html, 'class="advanced-subdetails"', 'options.html');
 });
 
 test('options.js maps settings keys for smart and email features', () => {

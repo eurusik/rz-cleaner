@@ -6,6 +6,7 @@
   const DIAGNOSTICS_STORAGE_KEY = `${STORAGE_KEY}_diagnostics`;
   const DEFAULTS = CONFIG.defaults || {};
   const SELECTORS = CONFIG.selectors || { promo: [], ai: [], aiTextNodes: "" };
+  const ENABLED_KEY = "enabled";
   const FALLBACK_TEXT_KEYS = [
     "aiButtonTexts",
     "aiConsultationTexts",
@@ -17,12 +18,18 @@
 
   const statusEl = document.getElementById("status");
   const activeSelectorsEl = document.getElementById("activeSelectors");
+  const extensionEnabledEl = document.getElementById("extensionEnabled");
+  const applyRecommendedSettingsBtn = document.getElementById("applyRecommendedSettings");
   const resetFallbackBtn = document.getElementById("resetFallbackTexts");
   const resetCustomSelectorsBtn = document.getElementById("resetCustomSelectors");
+  const copyActiveSelectorsBtn = document.getElementById("copyActiveSelectors");
+  const copyActiveSelectorsStatusEl = document.getElementById("copyActiveSelectorsStatus");
+  const runDiagnosticsNowBtn = document.getElementById("runDiagnosticsNow");
   const diagnosticsSummaryEl = document.getElementById("diagnosticsSummary");
   const diagnosticsMetaEl = document.getElementById("diagnosticsMeta");
   const diagnosticsListEl = document.getElementById("diagnosticsList");
   const refreshDiagnosticsBtn = document.getElementById("refreshDiagnostics");
+  const diagnosticsDetailsEl = document.querySelector(".diagnostics-details");
   const checkboxKeys = Object.keys(DEFAULTS).filter((k) => typeof DEFAULTS[k] === "boolean");
   const textKeys = Object.keys(DEFAULTS).filter((k) => typeof DEFAULTS[k] === "string");
   const FEATURE_LABELS = {
@@ -51,7 +58,8 @@
   };
   let statusTimer = 0;
   let saveTimer = 0;
-  let currentSettings = { ...DEFAULTS };
+  let copyStatusTimer = 0;
+  let currentSettings = { ...DEFAULTS, [ENABLED_KEY]: true };
 
   function renderDiagnosticsEmpty(message) {
     if (diagnosticsSummaryEl) diagnosticsSummaryEl.textContent = message;
@@ -69,6 +77,7 @@
   }
 
   function isFeatureEnabledInCurrentOptions(featureId) {
+    if (currentSettings[ENABLED_KEY] === false) return false;
     const key = FEATURE_SETTING_KEYS[featureId];
     if (!key) return false;
 
@@ -330,10 +339,16 @@
   }
 
   function applySettingsToUI(settings) {
+    const isEnabled = settings[ENABLED_KEY] !== false;
+    if (extensionEnabledEl) {
+      extensionEnabledEl.checked = isEnabled;
+    }
+
     checkboxKeys.forEach((key) => {
       const el = document.getElementById(key);
       if (!el) return;
       el.checked = Boolean(settings[key]);
+      el.disabled = !isEnabled;
     });
 
     textKeys.forEach((key) => {
@@ -362,13 +377,13 @@
   function loadSettings() {
     return new Promise((resolve) => {
       if (!chrome.storage || !chrome.storage.sync) {
-        resolve({ ...DEFAULTS });
+        resolve({ ...DEFAULTS, [ENABLED_KEY]: true });
         return;
       }
 
       chrome.storage.sync.get({ ...DEFAULTS, [STORAGE_KEY]: null }, (stored) => {
         if (chrome.runtime && chrome.runtime.lastError) {
-          resolve({ ...DEFAULTS });
+          resolve({ ...DEFAULTS, [ENABLED_KEY]: true });
           return;
         }
 
@@ -381,8 +396,20 @@
           if (key in stored) legacy[key] = stored[key];
         });
 
-        resolve({ ...DEFAULTS, ...legacy, ...namespaced });
+        const merged = { ...DEFAULTS, ...legacy, ...namespaced };
+        if (!(ENABLED_KEY in merged)) merged[ENABLED_KEY] = true;
+        resolve(merged);
       });
+    });
+  }
+
+  function updateQuickSettingsState(enabled) {
+    const quickPanel = document.querySelector(".panel");
+    if (quickPanel) quickPanel.classList.toggle("is-disabled", !enabled);
+    checkboxKeys.forEach((key) => {
+      const el = document.getElementById(key);
+      if (!el) return;
+      el.disabled = !enabled;
     });
   }
 
@@ -415,10 +442,71 @@
     }
   }
 
+  async function copyTextToClipboard(text) {
+    if (!text) return false;
+    if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
+      try {
+        await navigator.clipboard.writeText(text);
+        return true;
+      } catch (err) {}
+    }
+
+    const temp = document.createElement("textarea");
+    temp.value = text;
+    temp.style.position = "fixed";
+    temp.style.opacity = "0";
+    document.body.appendChild(temp);
+    temp.focus();
+    temp.select();
+    let copied = false;
+    try {
+      copied = document.execCommand("copy");
+    } catch (err) {
+      copied = false;
+    }
+    document.body.removeChild(temp);
+    return copied;
+  }
+
+  function setCopyStatus(text, isError = false) {
+    if (!copyActiveSelectorsStatusEl) return;
+    copyActiveSelectorsStatusEl.textContent = text;
+    copyActiveSelectorsStatusEl.classList.toggle("error", isError);
+    copyActiveSelectorsStatusEl.classList.toggle("visible", Boolean(text));
+    if (copyStatusTimer) window.clearTimeout(copyStatusTimer);
+    copyStatusTimer = window.setTimeout(() => {
+      copyStatusTimer = 0;
+      copyActiveSelectorsStatusEl.textContent = "";
+      copyActiveSelectorsStatusEl.classList.remove("error", "visible");
+    }, 1400);
+  }
+
   loadSettings().then((settings) => {
     currentSettings = settings;
     applySettingsToUI(currentSettings);
+    updateQuickSettingsState(currentSettings[ENABLED_KEY] !== false);
     loadDiagnostics();
+
+    if (extensionEnabledEl) {
+      extensionEnabledEl.addEventListener("change", () => {
+        currentSettings[ENABLED_KEY] = extensionEnabledEl.checked;
+        updateQuickSettingsState(extensionEnabledEl.checked);
+        scheduleSave(0);
+      });
+    }
+
+    if (applyRecommendedSettingsBtn) {
+      applyRecommendedSettingsBtn.addEventListener("click", () => {
+        checkboxKeys.forEach((key) => {
+          currentSettings[key] = Boolean(DEFAULTS[key]);
+        });
+        currentSettings[ENABLED_KEY] = true;
+        applySettingsToUI(currentSettings);
+        updateQuickSettingsState(true);
+        scheduleSave(0);
+        showStatus("Налаштування скинуто", "success");
+      });
+    }
 
     checkboxKeys.forEach((key) => {
       const el = document.getElementById(key);
@@ -446,6 +534,7 @@
         });
         applySettingsToUI(currentSettings);
         scheduleSave(0);
+        showStatus("Фрази скинуто до стандартних", "success");
       });
     }
 
@@ -455,6 +544,26 @@
           typeof DEFAULTS[CUSTOM_SELECTOR_KEY] === "string" ? DEFAULTS[CUSTOM_SELECTOR_KEY] : "";
         applySettingsToUI(currentSettings);
         scheduleSave(0);
+        showStatus("Користувацькі CSS очищено", "success");
+      });
+    }
+
+    if (copyActiveSelectorsBtn) {
+      copyActiveSelectorsBtn.addEventListener("click", async () => {
+        const copied = await copyTextToClipboard(activeSelectorsEl ? activeSelectorsEl.value : "");
+        if (copied) {
+          setCopyStatus("Скопійовано");
+          return;
+        }
+        setCopyStatus("Помилка", true);
+      });
+    }
+
+    if (runDiagnosticsNowBtn) {
+      runDiagnosticsNowBtn.addEventListener("click", () => {
+        if (diagnosticsDetailsEl) diagnosticsDetailsEl.open = true;
+        loadDiagnostics();
+        showStatus("Статус оновлено", "success");
       });
     }
 

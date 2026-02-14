@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="uk">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rozetka Cleaner</title>
+    <link rel="stylesheet" href="popup.css">
+  </head>
+  <body>
+    <main class="popup">
+      <header class="head">
+        <img src="icons/icon32.png" alt="Rozetka Cleaner">
+        <div>
+          <h1>Rozetka Cleaner</h1>
+          <p>Швидкі перемикачі</p>
+        </div>
+      </header>
+
+      <section class="master">
+        <label class="row row-master">
+          <input id="extensionEnabled" type="checkbox">
+          <span>Розширення увімкнено</span>
+        </label>
+        <p class="master-hint">Вимикає або вмикає всі правила одразу.</p>
+      </section>
+
+      <section class="toggles">
+        <label class="row"><input id="hideAdvertisingSections" type="checkbox"><span>Прибрати рекламу</span></label>
+        <label class="row"><input id="hideSmartDeliveryBadge" type="checkbox"><span>Прибрати Smart-блоки</span></label>
+        <label class="row"><input id="hideEmailSubscriptionBanner" type="checkbox"><span>Прибрати email-банер</span></label>
+        <label class="row"><input id="hidePromoBlocks" type="checkbox"><span>Прибрати ціну “за Карткою”</span></label>
+        <label class="row"><input id="hideRedBonusBlocks" type="checkbox"><span>Прибрати бонусні блоки</span></label>
+        <label class="row"><input id="hideRozetkaAI" type="checkbox"><span>Прибрати Rozetka AI</span></label>
+        <label class="row"><input id="normalizePriceLayout" type="checkbox"><span>Компактні ціни</span></label>
+      </section>
+
+      <div class="actions">
+        <button id="openOptions" type="button" class="btn">Повні налаштування</button>
+      </div>
+
+      <p id="status" class="status" aria-live="polite"></p>
+    </main>
+
+    <script src="config.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>

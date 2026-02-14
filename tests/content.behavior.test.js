@@ -82,6 +82,22 @@ test('content does not hide smart/email when toggles are disabled from settings'
   assert.equal(isHidden(targets.emailBanner), false);
 });
 
+test('content does not apply hiding when extension is globally disabled', async () => {
+  const harness = createHarness({
+    hideSmartDeliveryBadge: true,
+    hideEmailSubscriptionBanner: true,
+    enabled: false
+  });
+  const targets = makeTargets(harness);
+  wireSmartAndEmailSelectors(harness, targets);
+
+  await harness.runContent();
+
+  assert.equal(isHidden(targets.deliveryPrice), false);
+  assert.equal(isHidden(targets.deliveryPremium), false);
+  assert.equal(isHidden(targets.emailBanner), false);
+});
+
 test('content reveals blocks when settings toggle off via storage change', async () => {
   const harness = createHarness();
   const targets = makeTargets(harness);

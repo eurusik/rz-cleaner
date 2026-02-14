@@ -94,6 +94,18 @@
     "tags-list",
     "max-three-rows"
   ];
+  const MANAGED_FEATURES = [
+    FEATURE.PROMO_MAIN,
+    FEATURE.RED_BONUS,
+    FEATURE.ADVERTISING,
+    FEATURE.QUICK_FILTERS,
+    FEATURE.AI_BUTTON,
+    FEATURE.AI_CONSULT,
+    FEATURE.POPULAR_SEARCH_CHIPS,
+    FEATURE.SMART_DELIVERY_BADGE,
+    FEATURE.EMAIL_SUBSCRIPTION_BANNER,
+    FEATURE.CUSTOM
+  ];
 
   let currentSettings = normalizeSettings(DEFAULTS);
   let observer = null;
@@ -657,6 +669,11 @@
   }
 
   function runCleanup(root, settings) {
+    if (settings.enabled === false) {
+      scheduleDiagnostics(settings);
+      return;
+    }
+
     hidePromoPrices(root, settings);
     hideRedBonusBlocks(root, settings);
     hideAdvertisingSections(root, settings);
@@ -847,6 +864,7 @@
 
   function normalizeSettings(raw) {
     const merged = { ...DEFAULTS, ...(raw || {}) };
+    merged.enabled = merged.enabled !== false;
     merged.customHideSelectors = typeof merged.customHideSelectors === "string" ? merged.customHideSelectors : "";
     merged.aiButtonTexts = typeof merged.aiButtonTexts === "string" ? merged.aiButtonTexts : "";
     merged.aiConsultationTexts = typeof merged.aiConsultationTexts === "string" ? merged.aiConsultationTexts : "";
@@ -862,6 +880,10 @@
     return merged;
   }
 
+  function removeAllManagedFeatures(root) {
+    MANAGED_FEATURES.forEach((featureId) => removeFeatureFromAll(root, featureId));
+  }
+
   function hideCustomSelectors(root, settings) {
     const list = settings.customHideSelectorList || [];
     if (!list.length) return;
@@ -874,6 +896,10 @@
 
   function applyLayoutMode(settings) {
     const root = document.documentElement;
+    if (settings.enabled === false) {
+      root.classList.remove(ROOT_CLASS_NORMALIZE);
+      return;
+    }
     if (settings.normalizePriceLayout) {
       root.classList.add(ROOT_CLASS_NORMALIZE);
       return;
@@ -882,6 +908,12 @@
   }
 
   function reconcileSettings(prevSettings, nextSettings) {
+    if (prevSettings.enabled && !nextSettings.enabled) {
+      removeAllManagedFeatures(document);
+      return;
+    }
+    if (!nextSettings.enabled) return;
+
     if (prevSettings.hidePromoBlocks && !nextSettings.hidePromoBlocks) {
       removeFeatureFromAll(document, FEATURE.PROMO_MAIN);
     }

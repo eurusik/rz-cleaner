@@ -52,6 +52,24 @@ body {
   font-size: 17px;
 }
 
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 16px 2px;
+}
+
+.panel-head .panel-title {
+  margin: 0;
+}
+
+.panel-subtitle {
+  margin: 4px 16px 2px;
+  font-size: 12px;
+  color: #5b646b;
+}
+
 .panel-text {
   margin-top: 12px;
   padding: 14px 16px 12px;
@@ -165,12 +183,38 @@ body {
   padding: 12px 16px 16px;
 }
 
+.advanced-guide {
+  margin: 8px 0 14px;
+  padding-left: 18px;
+  color: #3b444a;
+  font-size: 13px;
+}
+
+.advanced-guide li + li {
+  margin-top: 4px;
+}
+
+.btn-inline {
+  margin-left: 8px;
+  padding: 4px 8px;
+  font-size: 11px;
+}
+
+.advanced-section-title {
+  margin: 12px 0 8px;
+  font-size: 15px;
+}
+
 .row {
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 14px 16px;
   cursor: pointer;
+}
+
+.row-master {
+  font-weight: 700;
 }
 
 .row + .row {
@@ -180,6 +224,10 @@ body {
 .row input[type="checkbox"] {
   width: 18px;
   height: 18px;
+}
+
+.panel.is-disabled .row:not(.row-master) {
+  opacity: 0.62;
 }
 
 .status {
@@ -221,6 +269,12 @@ body {
   gap: 4px;
 }
 
+.action-inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .action-note {
   margin: 0;
   font-size: 11px;
@@ -260,7 +314,7 @@ body {
 }
 
 .fallback-textarea {
-  min-height: 74px;
+  min-height: 58px;
 }
 
 .selectors-textarea:focus {
@@ -282,4 +336,57 @@ body {
   margin: 8px 0 0;
   font-size: 12px;
   color: #5b646b;
+}
+
+.hint-warning {
+  color: #8f4b00;
+}
+
+.advanced-subdetails {
+  margin-top: 12px;
+  border: 1px solid #e8edf1;
+  border-radius: 10px;
+  padding: 0;
+  background: #fbfcfd;
+}
+
+.advanced-subdetails summary {
+  cursor: pointer;
+  list-style: none;
+  padding: 10px 12px;
+  font-weight: 700;
+}
+
+.advanced-subdetails summary::-webkit-details-marker {
+  display: none;
+}
+
+.advanced-subdetails[open] summary {
+  border-bottom: 1px solid #e8edf1;
+}
+
+.advanced-subdetails .actions {
+  margin: 10px 12px 8px;
+}
+
+.advanced-subdetails .selectors-textarea {
+  margin: 0 12px 12px;
+  width: calc(100% - 24px);
+}
+
+.copy-status {
+  font-size: 11px;
+  font-weight: 700;
+  color: #0f7d42;
+  min-width: 0;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.copy-status.error {
+  color: #b42318;
+}
+
+.copy-status.visible {
+  opacity: 1;
 }

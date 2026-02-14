@@ -17,7 +17,17 @@
       </header>
 
       <section class="panel">
-        <h2 class="panel-title">Швидкі налаштування</h2>
+        <div class="panel-head">
+          <h2 class="panel-title">Швидкі налаштування</h2>
+          <button id="applyRecommendedSettings" type="button" class="btn btn-secondary">Скинути до рекомендованих</button>
+        </div>
+        <p class="panel-subtitle">Повертає всі перемикачі до стандартних значень.</p>
+
+        <label class="row row-master">
+          <input id="extensionEnabled" type="checkbox">
+          <span>Розширення увімкнено</span>
+        </label>
+
         <label class="row">
           <input id="hidePromoBlocks" type="checkbox">
           <span>Прибрати додаткову ціну “за Карткою Rozetka” в товарах</span>
@@ -91,14 +101,21 @@
               Використовуйте цей блок лише якщо після оновлення Rozetka щось перестало ховатися.
             </p>
 
+            <ol class="advanced-guide">
+              <li>Змініть потрібну фразу у блоці нижче.</li>
+              <li>Оновіть сторінку Rozetka.</li>
+              <li>
+                Перевірте секцію “Стан роботи розширення”.
+                <button id="runDiagnosticsNow" type="button" class="btn btn-secondary btn-inline">Перевірити зараз</button>
+              </li>
+              <li>Лише якщо не спрацювало — додайте CSS-селектори.</li>
+            </ol>
+
+            <h3 class="advanced-section-title">Запасні фрази (безпечніше)</h3>
             <div class="actions">
               <div class="action-item">
-                <button id="resetFallbackTexts" type="button" class="btn">Скинути тільки фрази пошуку</button>
+                <button id="resetFallbackTexts" type="button" class="btn">Скинути фрази до стандартних</button>
                 <p class="action-note">Повертає стандартні фрази у 5 полях нижче.</p>
-              </div>
-              <div class="action-item">
-                <button id="resetCustomSelectors" type="button" class="btn btn-secondary">Очистити тільки CSS-селектори</button>
-                <p class="action-note">Очищає лише поле “Додаткові CSS-селектори”.</p>
               </div>
             </div>
 
@@ -144,6 +161,16 @@ ai-помічник"
             ></textarea>
             <p class="hint">Ці фрази потрібні як запасний варіант, якщо звичайні правила не спрацювали.</p>
 
+            <h3 class="advanced-section-title">Користувацькі CSS-селектори (просунуто)</h3>
+            <p class="hint hint-warning">
+              Неправильний селектор може приховати зайві елементи. Додавайте зміни по одному рядку.
+            </p>
+            <div class="actions">
+              <div class="action-item">
+                <button id="resetCustomSelectors" type="button" class="btn btn-secondary">Очистити користувацькі CSS</button>
+                <p class="action-note">Очищає лише поле “Додаткові CSS-селектори”.</p>
+              </div>
+            </div>
             <label for="customHideSelectors" class="textarea-label">Додаткові CSS-селектори для приховування</label>
             <textarea
               id="customHideSelectors"
@@ -154,12 +181,23 @@ rz-some-new-banner
             ></textarea>
             <p class="hint">Після зміни оновіть сторінку Rozetka.</p>
 
-            <label for="activeSelectors" class="textarea-label">Технічні правила, які зараз використовуються</label>
-            <textarea
-              id="activeSelectors"
-              class="selectors-textarea selectors-textarea-readonly"
-              readonly
-            ></textarea>
+            <details class="advanced-subdetails">
+              <summary>Технічні правила, які зараз використовуються</summary>
+              <div class="actions">
+                <div class="action-item">
+                  <div class="action-inline">
+                    <button id="copyActiveSelectors" type="button" class="btn btn-secondary">Скопіювати активні правила</button>
+                    <span id="copyActiveSelectorsStatus" class="copy-status" aria-live="polite"></span>
+                  </div>
+                  <p class="action-note">Зручно для баг-репорту або резервної копії.</p>
+                </div>
+              </div>
+              <textarea
+                id="activeSelectors"
+                class="selectors-textarea selectors-textarea-readonly"
+                readonly
+              ></textarea>
+            </details>
           </div>
         </details>
       </section>
