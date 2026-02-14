@@ -18,6 +18,7 @@
   const FEATURE = {
     PROMO_MAIN: "promo-main",
     PROMO_LABELS: "promo-labels",
+    PRODUCT_PICTOGRAMS: "product-pictograms",
     RED_BONUS: "red-bonus",
     BONUS_POINTS: "bonus-points",
     ADVERTISING: "advertising",
@@ -30,6 +31,7 @@
     SUPER_OFFER: "super-offer",
     PRODUCT_SERVICES: "product-services",
     STICKY_PRODUCT_CARRIAGE: "sticky-product-carriage",
+    PROMOTION_PRODUCT: "promotion-product",
     CUSTOM: "custom"
   };
 
@@ -50,6 +52,7 @@
     "rz-product-tile",
     "rz-red-price",
     "rz-promo-label",
+    "rz-product-pictograms",
     "rz-product-banner",
     "rz-tile-bonus",
     "rz-product-red-bonus",
@@ -65,6 +68,7 @@
     "rz-super-offer",
     "rz-product-services",
     "rz-product-carriage",
+    "rz-promotion-product",
     "rz-store-rich-content",
     "rz-tag-list",
     '[data-testid="advertising-slider"]',
@@ -72,6 +76,7 @@
     ".red-label",
     ".tile-promo-label",
     ".promo-label",
+    ".vertical-theme",
     ".red-icon",
     ".bonus__red",
     ".loyalty__red-card",
@@ -82,6 +87,7 @@
     ".super-offer",
     ".additional-services-container",
     ".carriage__main",
+    ".product-promotion",
     ".rich-content",
     ".tags-list"
   ].join(", ");
@@ -89,6 +95,7 @@
     "RZ-PRODUCT-TILE",
     "RZ-RED-PRICE",
     "RZ-PROMO-LABEL",
+    "RZ-PRODUCT-PICTOGRAMS",
     "RZ-PRODUCT-BANNER",
     "RZ-TILE-BONUS",
     "RZ-PRODUCT-RED-BONUS",
@@ -104,6 +111,7 @@
     "RZ-SUPER-OFFER",
     "RZ-PRODUCT-SERVICES",
     "RZ-PRODUCT-CARRIAGE",
+    "RZ-PROMOTION-PRODUCT",
     "RZ-STORE-RICH-CONTENT",
     "RZ-TAG-LIST"
   ]);
@@ -121,6 +129,7 @@
     "super-offer",
     "additional-services-container",
     "carriage__main",
+    "product-promotion",
     "rich-content",
     "tags-list",
     "max-three-rows"
@@ -128,6 +137,7 @@
   const MANAGED_FEATURES = [
     FEATURE.PROMO_MAIN,
     FEATURE.PROMO_LABELS,
+    FEATURE.PRODUCT_PICTOGRAMS,
     FEATURE.RED_BONUS,
     FEATURE.BONUS_POINTS,
     FEATURE.ADVERTISING,
@@ -140,6 +150,7 @@
     FEATURE.SUPER_OFFER,
     FEATURE.PRODUCT_SERVICES,
     FEATURE.STICKY_PRODUCT_CARRIAGE,
+    FEATURE.PROMOTION_PRODUCT,
     FEATURE.CUSTOM
   ];
 

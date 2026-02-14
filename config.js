@@ -8,6 +8,7 @@
     defaults: {
       hidePromoBlocks: true,
       hidePromoLabels: true,
+      hideProductPictograms: true,
       hideRedBonusBlocks: true,
       hideBonusPoints: true,
       hideAdvertisingSections: true,
@@ -20,6 +21,7 @@
       hideSuperOffer: true,
       hideProductServices: true,
       hideStickyProductCarriage: true,
+      hidePromotionProduct: true,
       normalizePriceLayout: true,
       aiButtonTexts: "rozetka ai",
       aiConsultationTexts: "потрібна консультація\nai-помічник",
@@ -41,6 +43,11 @@
         { query: "rz-product-tile rz-promo-label.tile-promo-label" },
         { query: "rz-product-tile rz-promo-label.promo-label" },
         { query: "rz-product-tile rz-promo-label[class*='promo-label_type_']" }
+      ],
+      productPictograms: [
+        { query: "rz-product-tile rz-product-pictograms", closest: "rz-product-pictograms" },
+        { query: "rz-product-pictograms", closest: "rz-product-pictograms" },
+        { query: "rz-product-pictograms .item", closest: "rz-product-pictograms" }
       ],
       redBonus: [
         { query: "rz-tile-bonus .bonus__red", closest: "rz-tile-bonus" },
@@ -145,6 +152,11 @@
         { query: "rz-product-carriage", closest: "rz-product-carriage" },
         { query: "rz-product-carriage rz-sticky-buy", closest: "rz-product-carriage" },
         { query: "rz-product-carriage .carriage__main", closest: "rz-product-carriage" }
+      ],
+      promotionProduct: [
+        { query: "rz-promotion-product", closest: "rz-promotion-product" },
+        { query: "rz-promotion-product .product-promotion", closest: "rz-promotion-product" },
+        { query: "rz-promotion-product .product-promotion__label", closest: "rz-promotion-product" }
       ],
       aiTextNodes: "button, a, div, span"
     }

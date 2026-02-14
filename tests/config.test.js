@@ -26,6 +26,7 @@ test('config defaults include all boolean toggles', () => {
   const expected = [
     'hidePromoBlocks',
     'hidePromoLabels',
+    'hideProductPictograms',
     'hideRedBonusBlocks',
     'hideBonusPoints',
     'hideAdvertisingSections',
@@ -38,6 +39,7 @@ test('config defaults include all boolean toggles', () => {
     'hideSuperOffer',
     'hideProductServices',
     'hideStickyProductCarriage',
+    'hidePromotionProduct',
     'normalizePriceLayout'
   ];
 
@@ -61,6 +63,12 @@ test('config has selector for marketing email banner', () => {
   assert.ok(queries.includes('rz-marketing-subscription-banner'));
 });
 
+test('config has selector for product pictograms block', () => {
+  const rules = loadConfig().selectors.productPictograms || [];
+  const queries = rules.map((r) => r.query);
+  assert.ok(queries.includes('rz-product-pictograms'));
+});
+
 test('config has selector for super offer block', () => {
   const rules = loadConfig().selectors.superOffer || [];
   const queries = rules.map((r) => r.query);
@@ -77,4 +85,10 @@ test('config has selector for sticky product carriage block', () => {
   const rules = loadConfig().selectors.stickyProductCarriage || [];
   const queries = rules.map((r) => r.query);
   assert.ok(queries.includes('rz-product-carriage'));
+});
+
+test('config has selector for promotion product block', () => {
+  const rules = loadConfig().selectors.promotionProduct || [];
+  const queries = rules.map((r) => r.query);
+  assert.ok(queries.includes('rz-promotion-product'));
 });

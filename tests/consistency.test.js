@@ -31,6 +31,7 @@ test('each supported feature toggle has a mapping in options.js', () => {
   const requiredMappings = [
     'hidePromoBlocks',
     'hidePromoLabels',
+    'hideProductPictograms',
     'hideRedBonusBlocks',
     'hideBonusPoints',
     'hideAdvertisingSections',
@@ -42,7 +43,8 @@ test('each supported feature toggle has a mapping in options.js', () => {
     'hideEmailSubscriptionBanner',
     'hideSuperOffer',
     'hideProductServices',
-    'hideStickyProductCarriage'
+    'hideStickyProductCarriage',
+    'hidePromotionProduct'
   ];
 
   for (const settingKey of requiredMappings) {

@@ -35,6 +35,7 @@
   const FEATURE_LABELS = {
     "promo-main": "Додаткова ціна “за Карткою Rozetka”",
     "promo-labels": "Promo-бейджі (ТОП ПРОДАЖІВ / НОВИНКА / -%)",
+    "product-pictograms": "Піктограми в картці товару",
     "red-bonus": "Бонусні блоки за оплату карткою",
     "bonus-points": "Рядок “+ N бонусних ₴”",
     advertising: "Рекламні каруселі та рекламні картки",
@@ -46,12 +47,14 @@
     "email-subscription-banner": "Банер підписки на email",
     "super-offer": "Блок “Рекомендуємо” (Super Offer)",
     "product-services": "Блок “Додаткові послуги”",
-    "sticky-product-carriage": "Плаваючий нижній блок купівлі",
+    "sticky-product-carriage": "Нижня плаваюча панель кошика",
+    "promotion-product": "Акційний блок під товаром",
     custom: "Додаткові CSS-селектори"
   };
   const FEATURE_SETTING_KEYS = {
     "promo-main": "hidePromoBlocks",
     "promo-labels": "hidePromoLabels",
+    "product-pictograms": "hideProductPictograms",
     "red-bonus": "hideRedBonusBlocks",
     "bonus-points": "hideBonusPoints",
     advertising: "hideAdvertisingSections",
@@ -64,6 +67,7 @@
     "super-offer": "hideSuperOffer",
     "product-services": "hideProductServices",
     "sticky-product-carriage": "hideStickyProductCarriage",
+    "promotion-product": "hidePromotionProduct",
     custom: "customHideSelectors"
   };
   let statusTimer = 0;
@@ -259,6 +263,9 @@
     const promoLabels = (SELECTORS.promoLabels || [])
       .map((rule) => (rule && rule.query ? rule.query : ""))
       .filter(Boolean);
+    const productPictograms = (SELECTORS.productPictograms || [])
+      .map((rule) => (rule && rule.query ? rule.query : ""))
+      .filter(Boolean);
 
     const advertising = (SELECTORS.advertising || [])
       .map((rule) => (rule && rule.query ? rule.query : ""))
@@ -288,10 +295,14 @@
     const stickyProductCarriage = (SELECTORS.stickyProductCarriage || [])
       .map((rule) => (rule && rule.query ? rule.query : ""))
       .filter(Boolean);
+    const promotionProduct = (SELECTORS.promotionProduct || [])
+      .map((rule) => (rule && rule.query ? rule.query : ""))
+      .filter(Boolean);
 
     return {
       promoMain,
       promoLabels,
+      productPictograms,
       redBonus,
       bonusPoints,
       advertising,
@@ -303,7 +314,8 @@
       emailSubscriptionBanner,
       superOffer,
       productServices,
-      stickyProductCarriage
+      stickyProductCarriage,
+      promotionProduct
     };
   }
 
@@ -323,6 +335,9 @@
       "",
       "# Promo labels selectors (built-in)",
       ...builtIn.promoLabels,
+      "",
+      "# Product pictograms selectors (built-in)",
+      ...builtIn.productPictograms,
       "",
       "# Red bonus selectors (built-in)",
       ...builtIn.redBonus,
@@ -359,6 +374,9 @@
       "",
       "# Sticky product carriage selectors (built-in)",
       ...builtIn.stickyProductCarriage,
+      "",
+      "# Promotion product selectors (built-in)",
+      ...builtIn.promotionProduct,
       "",
       "# Запасний пошук: кнопка AI",
       ...aiButtonTexts,

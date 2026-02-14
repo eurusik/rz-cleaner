@@ -21,6 +21,8 @@ test('content core defines feature ids for new blocks', () => {
   mustContain(core, 'SMART_DELIVERY_BADGE: "smart-delivery-badge"', 'content-core.js');
   mustContain(core, 'EMAIL_SUBSCRIPTION_BANNER: "email-subscription-banner"', 'content-core.js');
   mustContain(core, 'PROMO_LABELS: "promo-labels"', 'content-core.js');
+  mustContain(core, 'PRODUCT_PICTOGRAMS: "product-pictograms"', 'content-core.js');
+  mustContain(core, 'PROMOTION_PRODUCT: "promotion-product"', 'content-core.js');
   mustContain(core, 'BONUS_POINTS: "bonus-points"', 'content-core.js');
   mustContain(core, 'SUPER_OFFER: "super-offer"', 'content-core.js');
   mustContain(core, 'PRODUCT_SERVICES: "product-services"', 'content-core.js');
@@ -46,6 +48,8 @@ test('feature modules include smart/email/super/services logic', () => {
 
 test('feature modules include promo, ads, ai and rich spoiler hooks', () => {
   mustContain(promo, 'ctx.FEATURE.PROMO_MAIN', 'features/promo.js');
+  mustContain(promo, 'ctx.FEATURE.PRODUCT_PICTOGRAMS', 'features/promo.js');
+  mustContain(smart, 'ctx.FEATURE.PROMOTION_PRODUCT', 'features/smart.js');
   mustContain(ads, 'ctx.FEATURE.ADVERTISING', 'features/ads.js');
   mustContain(ai, 'ctx.FEATURE.AI_BUTTON', 'features/ai.js');
   mustContain(rich, 'Показати повний опис', 'features/rich-content-spoiler.js');
@@ -64,12 +68,16 @@ test('content observer hints include smart/delivery/email and rich tags', () => 
   mustContain(core, '"rz-delivery-premium"', 'content-core.js');
   mustContain(core, '"rz-delivery-price"', 'content-core.js');
   mustContain(core, '"rz-marketing-subscription-banner"', 'content-core.js');
+  mustContain(core, '"rz-product-pictograms"', 'content-core.js');
+  mustContain(core, '"rz-promotion-product"', 'content-core.js');
   mustContain(core, '"rz-super-offer"', 'content-core.js');
   mustContain(core, '"rz-product-services"', 'content-core.js');
   mustContain(core, '"rz-product-carriage"', 'content-core.js');
   mustContain(core, '"rz-store-rich-content"', 'content-core.js');
   mustContain(core, '"RZ-STORE-RICH-CONTENT"', 'content-core.js');
   mustContain(core, '"RZ-PRODUCT-CARRIAGE"', 'content-core.js');
+  mustContain(core, '"RZ-PRODUCT-PICTOGRAMS"', 'content-core.js');
+  mustContain(core, '"RZ-PROMOTION-PRODUCT"', 'content-core.js');
 });
 
 test('content entrypoint is thin bootstrap', () => {

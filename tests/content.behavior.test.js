@@ -33,6 +33,12 @@ function wireSmartAndEmailSelectors(harness, targets) {
   document.setQueryResult('rz-product-carriage', [targets.stickyCarriage]);
   document.setQueryResult('rz-product-carriage rz-sticky-buy', [targets.stickyCarriageBuy]);
   document.setQueryResult('rz-product-carriage .carriage__main', [targets.stickyCarriageMain]);
+  document.setQueryResult('rz-promotion-product', [targets.promotionProduct]);
+  document.setQueryResult('rz-promotion-product .product-promotion', [targets.promotionProductBody]);
+  document.setQueryResult('rz-promotion-product .product-promotion__label', [targets.promotionProductLabel]);
+  document.setQueryResult('rz-product-pictograms', [targets.productPictograms]);
+  document.setQueryResult('rz-product-tile rz-product-pictograms', [targets.productPictograms]);
+  document.setQueryResult('rz-product-pictograms .item', [targets.productPictogramsItem]);
 }
 
 function makeTargets(harness) {
@@ -71,6 +77,16 @@ function makeTargets(harness) {
   stickyCarriage.appendChild(stickyCarriageMain);
   stickyCarriage.appendChild(stickyCarriageBuy);
 
+  const promotionProduct = harness.createElement('rz-promotion-product');
+  const promotionProductBody = harness.createElement('div', { classes: ['product-promotion'] });
+  const promotionProductLabel = harness.createElement('img', { classes: ['product-promotion__label'] });
+  promotionProduct.appendChild(promotionProductBody);
+  promotionProduct.appendChild(promotionProductLabel);
+
+  const productPictograms = harness.createElement('rz-product-pictograms', { classes: ['vertical-theme'] });
+  const productPictogramsItem = harness.createElement('div', { classes: ['item'] });
+  productPictograms.appendChild(productPictogramsItem);
+
   return {
     deliveryPrice,
     deliveryPriceIcon,
@@ -88,7 +104,12 @@ function makeTargets(harness) {
     productServicesInner,
     stickyCarriage,
     stickyCarriageMain,
-    stickyCarriageBuy
+    stickyCarriageBuy,
+    promotionProduct,
+    promotionProductBody,
+    promotionProductLabel,
+    productPictograms,
+    productPictogramsItem
   };
 }
 
@@ -105,6 +126,8 @@ test('content hides smart delivery and email banner blocks on initial cleanup', 
   assert.equal(isHidden(targets.superOffer), true);
   assert.equal(isHidden(targets.productServices), true);
   assert.equal(isHidden(targets.stickyCarriage), true);
+  assert.equal(isHidden(targets.promotionProduct), true);
+  assert.equal(isHidden(targets.productPictograms), true);
 });
 
 test('content does not hide smart/email when toggles are disabled from settings', async () => {
@@ -113,7 +136,9 @@ test('content does not hide smart/email when toggles are disabled from settings'
     hideEmailSubscriptionBanner: false,
     hideSuperOffer: false,
     hideProductServices: false,
-    hideStickyProductCarriage: false
+    hideStickyProductCarriage: false,
+    hidePromotionProduct: false,
+    hideProductPictograms: false
   });
   const targets = makeTargets(harness);
   wireSmartAndEmailSelectors(harness, targets);
@@ -126,6 +151,8 @@ test('content does not hide smart/email when toggles are disabled from settings'
   assert.equal(isHidden(targets.superOffer), false);
   assert.equal(isHidden(targets.productServices), false);
   assert.equal(isHidden(targets.stickyCarriage), false);
+  assert.equal(isHidden(targets.promotionProduct), false);
+  assert.equal(isHidden(targets.productPictograms), false);
 });
 
 test('content does not apply hiding when extension is globally disabled', async () => {
@@ -135,6 +162,8 @@ test('content does not apply hiding when extension is globally disabled', async 
     hideSuperOffer: true,
     hideProductServices: true,
     hideStickyProductCarriage: true,
+    hidePromotionProduct: true,
+    hideProductPictograms: true,
     enabled: false
   });
   const targets = makeTargets(harness);
@@ -148,6 +177,8 @@ test('content does not apply hiding when extension is globally disabled', async 
   assert.equal(isHidden(targets.superOffer), false);
   assert.equal(isHidden(targets.productServices), false);
   assert.equal(isHidden(targets.stickyCarriage), false);
+  assert.equal(isHidden(targets.promotionProduct), false);
+  assert.equal(isHidden(targets.productPictograms), false);
 });
 
 test('content does not apply hiding when extension is paused', async () => {
@@ -157,6 +188,8 @@ test('content does not apply hiding when extension is paused', async () => {
     hideSuperOffer: true,
     hideProductServices: true,
     hideStickyProductCarriage: true,
+    hidePromotionProduct: true,
+    hideProductPictograms: true,
     enabled: true,
     pauseUntil: 9999999999999
   });
@@ -171,6 +204,8 @@ test('content does not apply hiding when extension is paused', async () => {
   assert.equal(isHidden(targets.superOffer), false);
   assert.equal(isHidden(targets.productServices), false);
   assert.equal(isHidden(targets.stickyCarriage), false);
+  assert.equal(isHidden(targets.promotionProduct), false);
+  assert.equal(isHidden(targets.productPictograms), false);
 });
 
 test('content reveals blocks when settings toggle off via storage change', async () => {
@@ -184,13 +219,17 @@ test('content reveals blocks when settings toggle off via storage change', async
   assert.equal(isHidden(targets.superOffer), true);
   assert.equal(isHidden(targets.productServices), true);
   assert.equal(isHidden(targets.stickyCarriage), true);
+  assert.equal(isHidden(targets.promotionProduct), true);
+  assert.equal(isHidden(targets.productPictograms), true);
 
   await harness.emitSettingsChange({
     hideSmartDeliveryBadge: false,
     hideEmailSubscriptionBanner: false,
     hideSuperOffer: false,
     hideProductServices: false,
-    hideStickyProductCarriage: false
+    hideStickyProductCarriage: false,
+    hidePromotionProduct: false,
+    hideProductPictograms: false
   });
 
   assert.equal(targets.deliveryPrice.getAttribute(HIDDEN_ATTR), null);
@@ -203,6 +242,10 @@ test('content reveals blocks when settings toggle off via storage change', async
   assert.equal(targets.productServices.classList.contains(HIDDEN_CLASS), false);
   assert.equal(targets.stickyCarriage.getAttribute(HIDDEN_ATTR), null);
   assert.equal(targets.stickyCarriage.classList.contains(HIDDEN_CLASS), false);
+  assert.equal(targets.promotionProduct.getAttribute(HIDDEN_ATTR), null);
+  assert.equal(targets.promotionProduct.classList.contains(HIDDEN_CLASS), false);
+  assert.equal(targets.productPictograms.getAttribute(HIDDEN_ATTR), null);
+  assert.equal(targets.productPictograms.classList.contains(HIDDEN_CLASS), false);
 });
 
 test('content applies hiding after pause ends via storage change', async () => {
@@ -212,6 +255,8 @@ test('content applies hiding after pause ends via storage change', async () => {
     hideSuperOffer: true,
     hideProductServices: true,
     hideStickyProductCarriage: true,
+    hidePromotionProduct: true,
+    hideProductPictograms: true,
     enabled: true,
     pauseUntil: 9999999999999
   });
@@ -224,6 +269,8 @@ test('content applies hiding after pause ends via storage change', async () => {
   assert.equal(isHidden(targets.superOffer), false);
   assert.equal(isHidden(targets.productServices), false);
   assert.equal(isHidden(targets.stickyCarriage), false);
+  assert.equal(isHidden(targets.promotionProduct), false);
+  assert.equal(isHidden(targets.productPictograms), false);
 
   await harness.emitSettingsChange({
     hideSmartDeliveryBadge: true,
@@ -231,6 +278,8 @@ test('content applies hiding after pause ends via storage change', async () => {
     hideSuperOffer: true,
     hideProductServices: true,
     hideStickyProductCarriage: true,
+    hidePromotionProduct: true,
+    hideProductPictograms: true,
     enabled: true,
     pauseUntil: 0
   });
@@ -241,6 +290,8 @@ test('content applies hiding after pause ends via storage change', async () => {
   assert.equal(isHidden(targets.superOffer), true);
   assert.equal(isHidden(targets.productServices), true);
   assert.equal(isHidden(targets.stickyCarriage), true);
+  assert.equal(isHidden(targets.promotionProduct), true);
+  assert.equal(isHidden(targets.productPictograms), true);
 });
 
 test('observer childList mutation triggers cleanup for dynamically added delivery price block', async () => {

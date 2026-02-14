@@ -9,6 +9,10 @@
     return ctx.SELECTORS.promoLabels || [];
   }
 
+  function productPictogramsRules(ctx) {
+    return ctx.SELECTORS.productPictograms || [];
+  }
+
   function redBonusRules(ctx) {
     return ctx.SELECTORS.redBonus || [];
   }
@@ -24,6 +28,9 @@
     if (settings.hidePromoLabels) {
       ctx.hideRuleSelectors(root, promoLabelRules(ctx), ctx.FEATURE.PROMO_LABELS);
     }
+    if (settings.hideProductPictograms) {
+      ctx.hideRuleSelectors(root, productPictogramsRules(ctx), ctx.FEATURE.PRODUCT_PICTOGRAMS);
+    }
     if (settings.hideRedBonusBlocks) {
       ctx.hideRuleSelectors(root, redBonusRules(ctx), ctx.FEATURE.RED_BONUS);
     }
@@ -38,6 +45,9 @@
     }
     if (prevSettings.hidePromoLabels && !nextSettings.hidePromoLabels) {
       ctx.removeFeatureFromAll(document, ctx.FEATURE.PROMO_LABELS);
+    }
+    if (prevSettings.hideProductPictograms && !nextSettings.hideProductPictograms) {
+      ctx.removeFeatureFromAll(document, ctx.FEATURE.PRODUCT_PICTOGRAMS);
     }
     if (prevSettings.hideRedBonusBlocks && !nextSettings.hideRedBonusBlocks) {
       ctx.removeFeatureFromAll(document, ctx.FEATURE.RED_BONUS);
@@ -59,6 +69,12 @@
         id: ctx.FEATURE.PROMO_LABELS,
         enabled: extensionEnabled && Boolean(settings.hidePromoLabels),
         selectorMatches: ctx.countUniqueMatchesByRules(scope, promoLabelRules(ctx)),
+        textMatch: null
+      },
+      {
+        id: ctx.FEATURE.PRODUCT_PICTOGRAMS,
+        enabled: extensionEnabled && Boolean(settings.hideProductPictograms),
+        selectorMatches: ctx.countUniqueMatchesByRules(scope, productPictogramsRules(ctx)),
         textMatch: null
       },
       {

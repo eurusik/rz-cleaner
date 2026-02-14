@@ -17,6 +17,8 @@ test('options.html has toggles for smart and email features', () => {
   mustContainIn(html, 'id="hideSuperOffer"', 'options.html');
   mustContainIn(html, 'id="hideProductServices"', 'options.html');
   mustContainIn(html, 'id="hideStickyProductCarriage"', 'options.html');
+  mustContainIn(html, 'id="hidePromotionProduct"', 'options.html');
+  mustContainIn(html, 'id="hideProductPictograms"', 'options.html');
   mustContainIn(html, 'id="hidePromoLabels"', 'options.html');
   mustContainIn(html, 'id="hideBonusPoints"', 'options.html');
   mustContainIn(html, 'id="extensionEnabled"', 'options.html');
@@ -32,6 +34,8 @@ test('options.js maps settings keys for smart and email features', () => {
   mustContainIn(js, '"super-offer": "hideSuperOffer"', 'options.js');
   mustContainIn(js, '"product-services": "hideProductServices"', 'options.js');
   mustContainIn(js, '"sticky-product-carriage": "hideStickyProductCarriage"', 'options.js');
+  mustContainIn(js, '"promotion-product": "hidePromotionProduct"', 'options.js');
+  mustContainIn(js, '"product-pictograms": "hideProductPictograms"', 'options.js');
   mustContainIn(js, '"promo-labels": "hidePromoLabels"', 'options.js');
   mustContainIn(js, '"bonus-points": "hideBonusPoints"', 'options.js');
 });
@@ -41,7 +45,9 @@ test('options.js has diagnostics labels for smart and email features', () => {
   mustContainIn(js, '"email-subscription-banner": "Банер підписки на email"', 'options.js');
   mustContainIn(js, '"super-offer": "Блок “Рекомендуємо” (Super Offer)"', 'options.js');
   mustContainIn(js, '"product-services": "Блок “Додаткові послуги”"', 'options.js');
-  mustContainIn(js, '"sticky-product-carriage": "Плаваючий нижній блок купівлі"', 'options.js');
+  mustContainIn(js, '"sticky-product-carriage": "Нижня плаваюча панель кошика"', 'options.js');
+  mustContainIn(js, '"promotion-product": "Акційний блок під товаром"', 'options.js');
+  mustContainIn(js, '"product-pictograms": "Піктограми в картці товару"', 'options.js');
   mustContainIn(js, '"promo-labels": "Promo-бейджі (ТОП ПРОДАЖІВ / НОВИНКА / -%)"', 'options.js');
   mustContainIn(js, '"bonus-points": "Рядок “+ N бонусних ₴”"', 'options.js');
 });
@@ -52,6 +58,8 @@ test('options.js includes built-in selectors sections for smart and email', () =
   mustContainIn(js, 'const superOffer = (SELECTORS.superOffer || [])', 'options.js');
   mustContainIn(js, 'const productServices = (SELECTORS.productServices || [])', 'options.js');
   mustContainIn(js, 'const stickyProductCarriage = (SELECTORS.stickyProductCarriage || [])', 'options.js');
+  mustContainIn(js, 'const promotionProduct = (SELECTORS.promotionProduct || [])', 'options.js');
+  mustContainIn(js, 'const productPictograms = (SELECTORS.productPictograms || [])', 'options.js');
   mustContainIn(js, 'const promoLabels = (SELECTORS.promoLabels || [])', 'options.js');
   mustContainIn(js, 'const bonusPoints = (SELECTORS.bonusPoints || [])', 'options.js');
   mustContainIn(js, '# Promo labels selectors (built-in)', 'options.js');
@@ -61,4 +69,6 @@ test('options.js includes built-in selectors sections for smart and email', () =
   mustContainIn(js, '# Super offer selectors (built-in)', 'options.js');
   mustContainIn(js, '# Product services selectors (built-in)', 'options.js');
   mustContainIn(js, '# Sticky product carriage selectors (built-in)', 'options.js');
+  mustContainIn(js, '# Promotion product selectors (built-in)', 'options.js');
+  mustContainIn(js, '# Product pictograms selectors (built-in)', 'options.js');
 });
