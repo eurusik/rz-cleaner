@@ -276,3 +276,26 @@ test('content keeps cleanup running when closest selector resolution throws', as
 
   assert.equal(isHidden(riskyNode), true);
 });
+
+test('content collapses store rich content and restores it when extension is disabled', async () => {
+  const harness = createHarness({ enabled: true });
+  const richBlock = harness.createElement('rz-store-rich-content');
+  const richContent = harness.createElement('div', {
+    classes: ['rich-content'],
+    textContent: 'x'.repeat(240)
+  });
+  richBlock.appendChild(richContent);
+
+  harness.document.setQueryResult('rz-store-rich-content', [richBlock]);
+  richBlock.setQueryResult('.rich-content', [richContent]);
+
+  await harness.runContent();
+
+  assert.equal(richBlock.classList.contains('rzc-rich-collapsed'), true);
+  assert.equal(richBlock.getAttribute('data-rzc-rich-collapsible'), '1');
+
+  await harness.emitSettingsChange({ enabled: false });
+
+  assert.equal(richBlock.classList.contains('rzc-rich-collapsed'), false);
+  assert.equal(richBlock.getAttribute('data-rzc-rich-collapsible'), null);
+});

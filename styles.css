@@ -25,3 +25,41 @@ html.rzc-normalize-price rz-product-tile rz-tile-price .price {
   line-height: 1.05 !important;
   font-weight: 700 !important;
 }
+
+/* Collapsible product description block (rz-store-rich-content) */
+rz-store-rich-content.rzc-rich-collapsed .rich-content {
+  position: relative;
+  max-height: 320px;
+  overflow: hidden;
+}
+
+rz-store-rich-content.rzc-rich-collapsed .rich-content::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 72px;
+  pointer-events: none;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0), #fff 92%);
+}
+
+rz-store-rich-content.rzc-rich-collapsed rz-read-all-btn {
+  display: none !important;
+}
+
+rz-store-rich-content .rzc-rich-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 10px 0 0;
+  border: 1px solid #d5d7dc;
+  border-radius: 8px;
+  background: #fff;
+  color: #00a046;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.2;
+  padding: 8px 12px;
+}

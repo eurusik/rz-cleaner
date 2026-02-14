@@ -16,7 +16,7 @@ function loadConfig() {
 
 const html = fs.readFileSync(path.join(ROOT, 'options.html'), 'utf8');
 const optionsJs = fs.readFileSync(path.join(ROOT, 'options.js'), 'utf8');
-const contentJs = fs.readFileSync(path.join(ROOT, 'content.js'), 'utf8');
+const contentJs = fs.readFileSync(path.join(ROOT, 'content-core.js'), 'utf8');
 
 test('each boolean default has a checkbox in options.html', () => {
   const defaults = loadConfig().defaults;
@@ -51,19 +51,9 @@ test('each supported feature toggle has a mapping in options.js', () => {
 
 test('content cleanup pipeline includes all major hide steps', () => {
   const requiredCalls = [
-    'hidePromoPrices(root, settings);',
-    'hidePromoLabels(root, settings);',
-    'hideRedBonusBlocks(root, settings);',
-    'hideBonusPoints(root, settings);',
-    'hideAdvertisingSections(root, settings);',
-    'hideQuickFilters(root, settings);',
-    'hideRozetkaAIWidget(root, settings);',
-    'hideAiConsultationBlock(root, settings);',
-    'hidePopularSearchChips(root, settings);',
-    'hideSmartDeliveryBadge(root, settings);',
-    'hideEmailSubscriptionBanner(root, settings);',
-    'hideSuperOffer(root, settings);',
-    'hideProductServices(root, settings);',
+    'FEATURE_REGISTRY.runFeatureCleanup(context, root, settings);',
+    'FEATURE_REGISTRY.onDisabled(context, root);',
+    'FEATURE_REGISTRY.reconcile(context, prevSettings, nextSettings);',
     'hideCustomSelectors(root, settings);'
   ];
 

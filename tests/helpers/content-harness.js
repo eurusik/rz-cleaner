@@ -4,7 +4,18 @@ const vm = require('node:vm');
 
 const ROOT = '/Users/eurusik/Documents/New project';
 const CONFIG_SOURCE = fs.readFileSync(path.join(ROOT, 'config.js'), 'utf8');
-const CONTENT_SOURCE = fs.readFileSync(path.join(ROOT, 'content.js'), 'utf8');
+const CONTENT_SOURCES = [
+  'dom-utils.js',
+  'features/promo.js',
+  'features/ads.js',
+  'features/ai.js',
+  'features/smart.js',
+  'features/rich-content-spoiler.js',
+  'diagnostics.js',
+  'feature-registry.js',
+  'content-core.js',
+  'content.js'
+].map((file) => fs.readFileSync(path.join(ROOT, file), 'utf8'));
 
 class FakeStyle {
   constructor() {
@@ -86,6 +97,7 @@ class FakeElement {
     this.children = [];
     this.textContent = options.textContent || '';
     this.__queryMap = new Map();
+    this.listeners = new Map();
   }
 
   appendChild(child) {
@@ -101,6 +113,12 @@ class FakeElement {
 
   querySelectorAll(selector) {
     return this.__queryMap.get(selector) || [];
+  }
+
+  addEventListener(type, cb) {
+    const list = this.listeners.get(type) || [];
+    list.push(cb);
+    this.listeners.set(type, list);
   }
 
   hasAttribute(name) {
@@ -134,6 +152,10 @@ class FakeDocument extends FakeElement {
     super('document');
     this.nodeType = 9;
     this.documentElement = new FakeElement('html');
+  }
+
+  createElement(tagName) {
+    return new FakeElement(tagName);
   }
 
   addEventListener() {}
@@ -234,7 +256,7 @@ function createHarness(initialSettings = {}) {
   };
 
   async function runContent() {
-    vm.runInContext(CONTENT_SOURCE, sandbox);
+    CONTENT_SOURCES.forEach((source) => vm.runInContext(source, sandbox));
     await Promise.resolve();
     await Promise.resolve();
   }
