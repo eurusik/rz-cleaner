@@ -6,11 +6,13 @@ const ROOT = '/Users/eurusik/Documents/New project';
 const CONFIG_SOURCE = fs.readFileSync(path.join(ROOT, 'config.js'), 'utf8');
 const CONTENT_SOURCES = [
   'dom-utils.js',
+  'tile-gallery-bridge-protocol.js',
   'features/promo.js',
   'features/ads.js',
   'features/ai.js',
   'features/smart.js',
   'features/rich-content-spoiler.js',
+  'features/tile-gallery.js',
   'diagnostics.js',
   'feature-registry.js',
   'content-core.js',
@@ -161,13 +163,15 @@ class FakeDocument extends FakeElement {
   addEventListener() {}
 }
 
-function createHarness(initialSettings = {}) {
+function createHarness(initialSettings = {}, options = {}) {
   const document = new FakeDocument();
   const allElements = new Set();
   const storageListeners = [];
   let syncSettings = { ...initialSettings };
   let lastObserver = null;
   let timerId = 0;
+  const initialFetch = typeof options.fetchImpl === 'function' ? options.fetchImpl : undefined;
+  const locationHref = String(options.locationHref || 'https://rozetka.com.ua/ua/mobile-phones/c80003/');
 
   class FakeMutationObserver {
     constructor(cb) {
@@ -203,13 +207,19 @@ function createHarness(initialSettings = {}) {
     },
     clearTimeout: () => {},
     addEventListener: () => {},
-    getComputedStyle: () => ({ position: 'static', zIndex: 'auto' })
+    getComputedStyle: () => ({ position: 'static', zIndex: 'auto' }),
+    fetch: initialFetch,
+    location: { href: locationHref },
+    URL
   };
 
   const sandbox = {
     console,
     window,
     document,
+    location: window.location,
+    fetch: initialFetch,
+    URL,
     Node: { ELEMENT_NODE: 1 },
     MutationObserver: FakeMutationObserver,
     chrome: {
@@ -279,6 +289,10 @@ function createHarness(initialSettings = {}) {
       const el = new FakeElement(tag, options);
       allElements.add(el);
       return el;
+    },
+    setFetch: (nextFetch) => {
+      window.fetch = nextFetch;
+      sandbox.fetch = nextFetch;
     }
   };
 }

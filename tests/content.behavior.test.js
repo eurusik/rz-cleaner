@@ -355,6 +355,154 @@ test('content keeps cleanup running when closest selector resolution throws', as
   assert.equal(isHidden(riskyNode), true);
 });
 
+test('content adds tile gallery arrows and switches image on click', async () => {
+  const harness = createHarness();
+  const tile = harness.createElement('rz-product-tile');
+  const imageHost = harness.createElement('a', { classes: ['tile-image-host'] });
+  const image = harness.createElement('img', { classes: ['tile-image'] });
+  image.setAttribute('src', 'https://content.rozetka.com.ua/goods/images/original/main.jpg');
+  image.setAttribute('data-hover-image', 'https://content.rozetka.com.ua/goods/images/original/hover.jpg');
+  imageHost.appendChild(image);
+  tile.appendChild(imageHost);
+
+  harness.document.setQueryResult('rz-product-tile', [tile]);
+  tile.setQueryResult('a.tile-image-host img.tile-image', [image]);
+  tile.setQueryResult('img', [image]);
+  imageHost.setQueryResult('img', [image]);
+  tile.setQueryResult(`[data-rzc-tile-gallery-btn]`, []);
+
+  await harness.runContent();
+
+  const arrows = imageHost.children.filter((node) => node.getAttribute('data-rzc-tile-gallery-btn'));
+  assert.equal(arrows.length, 2);
+
+  const next = arrows.find((node) => node.getAttribute('data-rzc-tile-gallery-btn') === 'next');
+  assert.ok(next);
+  const clickHandlers = next.listeners.get('click') || [];
+  assert.equal(clickHandlers.length > 0, true);
+  clickHandlers[0]({ preventDefault() {}, stopPropagation() {} });
+
+  assert.equal(image.getAttribute('src'), 'https://content.rozetka.com.ua/goods/images/big_tile/hover.jpg');
+});
+
+test('content fetches product page urls when tile has only one image url', async () => {
+  const fetchCalls = [];
+  const harness = createHarness(
+    {},
+    {
+      fetchImpl: async (href) => {
+        fetchCalls.push(String(href));
+        return {
+          ok: true,
+          text: async () => `
+            <img src="https://content.rozetka.com.ua/goods/images/original/594346714.jpg">
+            <img src="https://content.rozetka.com.ua/goods/images/original/594346720.jpg">
+            <img src="https://content2.rozetka.com.ua/goods/images/original/594346725.jpg">
+          `
+        };
+      },
+      locationHref: 'https://rozetka.com.ua/ua/mobile-phones/c80003/'
+    }
+  );
+  const tile = harness.createElement('rz-product-tile');
+  const imageHost = harness.createElement('a', { classes: ['tile-image-host'] });
+  imageHost.setAttribute('href', '/ua/apple-iphone-17-pro-256gb-deep-blue-mg8j4af-a/p543545605/');
+  const image = harness.createElement('img', { classes: ['tile-image'] });
+  image.setAttribute('src', 'https://content.rozetka.com.ua/goods/images/big_tile/594346714.jpg');
+  imageHost.appendChild(image);
+  tile.appendChild(imageHost);
+
+  harness.document.setQueryResult('rz-product-tile', [tile]);
+  tile.setQueryResult('a.tile-image-host img.tile-image', [image]);
+  tile.setQueryResult('img', [image]);
+  tile.setQueryResult('a.tile-image-host', [imageHost]);
+  tile.setQueryResult('a.tile-image-host[href]', [imageHost]);
+  tile.setQueryResult('a.tile-title[href]', []);
+  tile.setQueryResult("a[href*='/p']", [imageHost]);
+  imageHost.setQueryResult('img', [image]);
+  tile.setQueryResult(`[data-rzc-tile-gallery-btn]`, []);
+
+  await harness.runContent();
+  for (let i = 0; i < 10; i += 1) {
+    await Promise.resolve();
+  }
+
+  const arrows = imageHost.children.filter((node) => node.getAttribute('data-rzc-tile-gallery-btn'));
+  assert.equal(fetchCalls.length > 0, true);
+  assert.equal(
+    fetchCalls[0],
+    'https://rozetka.com.ua/ua/apple-iphone-17-pro-256gb-deep-blue-mg8j4af-a/p543545605/'
+  );
+  assert.equal(arrows.length, 2);
+  assert.equal(tile.getAttribute('data-rzc-tile-gallery-ready'), '1');
+});
+
+test('content mounts gallery arrows on tile-image-host instead of wrapper div', async () => {
+  const harness = createHarness();
+  const tile = harness.createElement('rz-product-tile');
+  const imageHost = harness.createElement('a', { classes: ['tile-image-host'] });
+  const innerWrapper = harness.createElement('div', { classes: ['image-wrapper'] });
+  const image = harness.createElement('img', { classes: ['tile-image'] });
+  image.setAttribute('src', 'https://content.rozetka.com.ua/goods/images/original/main.jpg');
+  image.setAttribute('data-hover-image', 'https://content.rozetka.com.ua/goods/images/original/hover.jpg');
+  innerWrapper.appendChild(image);
+  imageHost.appendChild(innerWrapper);
+  tile.appendChild(imageHost);
+
+  harness.document.setQueryResult('rz-product-tile', [tile]);
+  tile.setQueryResult('a.tile-image-host img.tile-image', [image]);
+  tile.setQueryResult('img', [image]);
+  tile.setQueryResult('a.tile-image-host', [imageHost]);
+  imageHost.setQueryResult('img', [image]);
+  tile.setQueryResult(`[data-rzc-tile-gallery-btn]`, []);
+
+  await harness.runContent();
+
+  const hostArrows = imageHost.children.filter((node) => node.getAttribute('data-rzc-tile-gallery-btn'));
+  const wrapperArrows = innerWrapper.children.filter((node) => node.getAttribute('data-rzc-tile-gallery-btn'));
+  assert.equal(hostArrows.length, 2);
+  assert.equal(wrapperArrows.length, 0);
+});
+
+test('content recreates tile gallery arrows when ready tile state exists but arrows are missing', async () => {
+  const harness = createHarness();
+  const tile = harness.createElement('rz-product-tile');
+  tile.setAttribute('data-rzc-tile-gallery-ready', '1');
+  const imageHost = harness.createElement('a', { classes: ['tile-image-host'] });
+  const image = harness.createElement('img', { classes: ['tile-image'] });
+  image.setAttribute('src', 'https://content.rozetka.com.ua/goods/images/original/main.jpg');
+  image.setAttribute('data-hover-image', 'https://content.rozetka.com.ua/goods/images/original/hover.jpg');
+  imageHost.appendChild(image);
+  tile.appendChild(imageHost);
+  tile.__rzcGalleryState = {
+    tile,
+    host: imageHost,
+    primaryImg: image,
+    productId: '',
+    urls: [
+      'https://content.rozetka.com.ua/goods/images/big_tile/main.jpg',
+      'https://content.rozetka.com.ua/goods/images/big_tile/hover.jpg'
+    ],
+    currentIndex: 0,
+    loading: false,
+    loadToken: 0,
+    warmPreloadStarted: false,
+    lastBridgeCheck: 0,
+    counterEl: null
+  };
+
+  harness.document.setQueryResult('rz-product-tile', [tile]);
+  tile.setQueryResult('a.tile-image-host img.tile-image', [image]);
+  tile.setQueryResult('img', [image]);
+  imageHost.setQueryResult('img', [image]);
+  tile.setQueryResult(`[data-rzc-tile-gallery-btn]`, []);
+
+  await harness.runContent();
+
+  const arrows = imageHost.children.filter((node) => node.getAttribute('data-rzc-tile-gallery-btn'));
+  assert.equal(arrows.length, 2);
+});
+
 test('content collapses store rich content and restores it when extension is disabled', async () => {
   const harness = createHarness({ enabled: true });
   const richBlock = harness.createElement('rz-store-rich-content');
