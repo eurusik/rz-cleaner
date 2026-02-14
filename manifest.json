@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "RZ Cleaner",
   "short_name": "RZ Cleaner",
-  "version": "1.6.2",
+  "version": "1.7.0",
   "description": "RZ Cleaner is an unofficial Rozetka helper extension that removes noise, hides promo clutter, and keeps product cards cleaner.",
   "minimum_chrome_version": "114",
   "permissions": [
