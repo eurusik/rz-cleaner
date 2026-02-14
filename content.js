@@ -162,6 +162,15 @@
     }
   }
 
+  function safeClosest(node, selector) {
+    if (!node || typeof node.closest !== "function" || !selector) return null;
+    try {
+      return node.closest(selector);
+    } catch (err) {
+      return null;
+    }
+  }
+
   function getTextList(raw, limit = 50) {
     if (typeof raw !== "string") return [];
     return raw
@@ -306,7 +315,7 @@
       if (!rule || !rule.query) return;
       safeQueryAll(scope, rule.query).forEach((node) => {
         matched = true;
-        const removable = rule.closest ? node.closest(rule.closest) || node : node;
+        const removable = rule.closest ? safeClosest(node, rule.closest) || node : node;
         hideElement(removable, featureId);
       });
     });
@@ -320,7 +329,7 @@
       safeQueryAll(scope, selector).forEach((el) => {
         matched = true;
         hideElement(el, featureId);
-        extraClosestSelectors.forEach((closestSel) => hideElement(el.closest(closestSel), featureId));
+        extraClosestSelectors.forEach((closestSel) => hideElement(safeClosest(el, closestSel), featureId));
       });
     });
     return matched;

@@ -262,3 +262,17 @@ test('style mutation marks hidden node as dirty and reveal clears inline hide st
   assert.equal(targets.deliveryPrice.style.getPropertyValue('display'), '');
   assert.equal(targets.deliveryPrice.style.getPropertyValue('visibility'), '');
 });
+
+test('content keeps cleanup running when closest selector resolution throws', async () => {
+  const harness = createHarness();
+  const riskyNode = harness.createElement('div');
+  riskyNode.closest = () => {
+    throw new Error('invalid selector');
+  };
+
+  harness.document.setQueryResult('rz-product-tile [data-testid="promo-price"]', [riskyNode]);
+
+  await harness.runContent();
+
+  assert.equal(isHidden(riskyNode), true);
+});
