@@ -44,7 +44,7 @@ rz-store-rich-content.rzc-rich-collapsed .rich-content::after {
   background: linear-gradient(to bottom, rgba(255, 255, 255, 0), #fff 92%);
 }
 
-rz-store-rich-content.rzc-rich-collapsed rz-read-all-btn {
+rz-store-rich-content[data-rzc-rich-collapsible="1"] rz-read-all-btn {
   display: none !important;
 }
 

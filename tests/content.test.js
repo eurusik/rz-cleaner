@@ -12,6 +12,7 @@ const ads = fs.readFileSync(path.join(ROOT, 'features/ads.js'), 'utf8');
 const ai = fs.readFileSync(path.join(ROOT, 'features/ai.js'), 'utf8');
 const smart = fs.readFileSync(path.join(ROOT, 'features/smart.js'), 'utf8');
 const rich = fs.readFileSync(path.join(ROOT, 'features/rich-content-spoiler.js'), 'utf8');
+const styles = fs.readFileSync(path.join(ROOT, 'styles.css'), 'utf8');
 
 function mustContain(text, snippet, label) {
   assert.ok(text.includes(snippet), `${label} missing snippet: ${snippet}`);
@@ -55,6 +56,14 @@ test('feature modules include promo, ads, ai and rich spoiler hooks', () => {
   mustContain(rich, 'Показати повний опис', 'features/rich-content-spoiler.js');
   mustContain(rich, 'Сховати повний опис', 'features/rich-content-spoiler.js');
   mustContain(rich, 'onDisabled', 'features/rich-content-spoiler.js');
+});
+
+test('styles keep native rich-content button hidden when custom spoiler is active', () => {
+  mustContain(
+    styles,
+    'rz-store-rich-content[data-rzc-rich-collapsible="1"] rz-read-all-btn',
+    'styles.css'
+  );
 });
 
 test('feature registry aggregates modules', () => {
