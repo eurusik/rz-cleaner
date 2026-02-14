@@ -93,7 +93,8 @@ test('recommended settings button enables extension and applies defaults', async
       hideBonusPoints: false,
       hideSmartDeliveryBadge: false,
       hideSuperOffer: false,
-      hideProductServices: false
+      hideProductServices: false,
+      hideStickyProductCarriage: false
     }
   });
   await harness.runOptions();
@@ -109,6 +110,7 @@ test('recommended settings button enables extension and applies defaults', async
   assert.equal(lastCall.rzc_settings.hideSmartDeliveryBadge, true);
   assert.equal(lastCall.rzc_settings.hideSuperOffer, true);
   assert.equal(lastCall.rzc_settings.hideProductServices, true);
+  assert.equal(lastCall.rzc_settings.hideStickyProductCarriage, true);
 });
 
 test('run diagnostics now opens diagnostics section', async () => {

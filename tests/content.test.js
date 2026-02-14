@@ -24,6 +24,7 @@ test('content core defines feature ids for new blocks', () => {
   mustContain(core, 'BONUS_POINTS: "bonus-points"', 'content-core.js');
   mustContain(core, 'SUPER_OFFER: "super-offer"', 'content-core.js');
   mustContain(core, 'PRODUCT_SERVICES: "product-services"', 'content-core.js');
+  mustContain(core, 'STICKY_PRODUCT_CARRIAGE: "sticky-product-carriage"', 'content-core.js');
 });
 
 test('content core uses feature registry for cleanup and reconcile', () => {
@@ -38,6 +39,7 @@ test('feature modules include smart/email/super/services logic', () => {
   mustContain(smart, 'hideEmailSubscriptionBanner', 'features/smart.js');
   mustContain(smart, 'hideSuperOffer', 'features/smart.js');
   mustContain(smart, 'hideProductServices', 'features/smart.js');
+  mustContain(smart, 'stickyProductCarriageRules', 'features/smart.js');
   mustContain(smart, 'id: ctx.FEATURE.SMART_DELIVERY_BADGE', 'features/smart.js');
   mustContain(smart, 'id: ctx.FEATURE.EMAIL_SUBSCRIPTION_BANNER', 'features/smart.js');
 });
@@ -64,8 +66,10 @@ test('content observer hints include smart/delivery/email and rich tags', () => 
   mustContain(core, '"rz-marketing-subscription-banner"', 'content-core.js');
   mustContain(core, '"rz-super-offer"', 'content-core.js');
   mustContain(core, '"rz-product-services"', 'content-core.js');
+  mustContain(core, '"rz-product-carriage"', 'content-core.js');
   mustContain(core, '"rz-store-rich-content"', 'content-core.js');
   mustContain(core, '"RZ-STORE-RICH-CONTENT"', 'content-core.js');
+  mustContain(core, '"RZ-PRODUCT-CARRIAGE"', 'content-core.js');
 });
 
 test('content entrypoint is thin bootstrap', () => {

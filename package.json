@@ -1,6 +1,6 @@
 {
   "name": "new-project",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "Просте розширення для Chrome, яке прибирає зайві промо-блоки на Rozetka і робить сторінку чистішою.",
   "main": "config.js",
   "scripts": {

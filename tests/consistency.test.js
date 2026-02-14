@@ -41,7 +41,8 @@ test('each supported feature toggle has a mapping in options.js', () => {
     'hideSmartDeliveryBadge',
     'hideEmailSubscriptionBanner',
     'hideSuperOffer',
-    'hideProductServices'
+    'hideProductServices',
+    'hideStickyProductCarriage'
   ];
 
   for (const settingKey of requiredMappings) {

@@ -17,6 +17,10 @@
     return ctx.SELECTORS.productServices || [];
   }
 
+  function stickyProductCarriageRules(ctx) {
+    return ctx.SELECTORS.stickyProductCarriage || [];
+  }
+
   function run(ctx, root, settings) {
     if (settings.hideSmartDeliveryBadge) {
       ctx.hideRuleSelectors(root, smartDeliveryBadgeRules(ctx), ctx.FEATURE.SMART_DELIVERY_BADGE);
@@ -29,6 +33,9 @@
     }
     if (settings.hideProductServices) {
       ctx.hideRuleSelectors(root, productServicesRules(ctx), ctx.FEATURE.PRODUCT_SERVICES);
+    }
+    if (settings.hideStickyProductCarriage) {
+      ctx.hideRuleSelectors(root, stickyProductCarriageRules(ctx), ctx.FEATURE.STICKY_PRODUCT_CARRIAGE);
     }
   }
 
@@ -44,6 +51,9 @@
     }
     if (prevSettings.hideProductServices && !nextSettings.hideProductServices) {
       ctx.removeFeatureFromAll(document, ctx.FEATURE.PRODUCT_SERVICES);
+    }
+    if (prevSettings.hideStickyProductCarriage && !nextSettings.hideStickyProductCarriage) {
+      ctx.removeFeatureFromAll(document, ctx.FEATURE.STICKY_PRODUCT_CARRIAGE);
     }
   }
 
@@ -71,6 +81,12 @@
         id: ctx.FEATURE.PRODUCT_SERVICES,
         enabled: extensionEnabled && Boolean(settings.hideProductServices),
         selectorMatches: ctx.countUniqueMatchesByRules(scope, productServicesRules(ctx)),
+        textMatch: null
+      },
+      {
+        id: ctx.FEATURE.STICKY_PRODUCT_CARRIAGE,
+        enabled: extensionEnabled && Boolean(settings.hideStickyProductCarriage),
+        selectorMatches: ctx.countUniqueMatchesByRules(scope, stickyProductCarriageRules(ctx)),
         textMatch: null
       }
     ];

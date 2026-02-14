@@ -46,6 +46,7 @@
     "email-subscription-banner": "Банер підписки на email",
     "super-offer": "Блок “Рекомендуємо” (Super Offer)",
     "product-services": "Блок “Додаткові послуги”",
+    "sticky-product-carriage": "Плаваючий нижній блок купівлі",
     custom: "Додаткові CSS-селектори"
   };
   const FEATURE_SETTING_KEYS = {
@@ -62,6 +63,7 @@
     "email-subscription-banner": "hideEmailSubscriptionBanner",
     "super-offer": "hideSuperOffer",
     "product-services": "hideProductServices",
+    "sticky-product-carriage": "hideStickyProductCarriage",
     custom: "customHideSelectors"
   };
   let statusTimer = 0;
@@ -283,6 +285,9 @@
     const productServices = (SELECTORS.productServices || [])
       .map((rule) => (rule && rule.query ? rule.query : ""))
       .filter(Boolean);
+    const stickyProductCarriage = (SELECTORS.stickyProductCarriage || [])
+      .map((rule) => (rule && rule.query ? rule.query : ""))
+      .filter(Boolean);
 
     return {
       promoMain,
@@ -297,7 +302,8 @@
       smartDeliveryBadge,
       emailSubscriptionBanner,
       superOffer,
-      productServices
+      productServices,
+      stickyProductCarriage
     };
   }
 
@@ -350,6 +356,9 @@
       "",
       "# Product services selectors (built-in)",
       ...builtIn.productServices,
+      "",
+      "# Sticky product carriage selectors (built-in)",
+      ...builtIn.stickyProductCarriage,
       "",
       "# Запасний пошук: кнопка AI",
       ...aiButtonTexts,

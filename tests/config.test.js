@@ -37,6 +37,7 @@ test('config defaults include all boolean toggles', () => {
     'hideEmailSubscriptionBanner',
     'hideSuperOffer',
     'hideProductServices',
+    'hideStickyProductCarriage',
     'normalizePriceLayout'
   ];
 
@@ -70,4 +71,10 @@ test('config has selector for product services block', () => {
   const rules = loadConfig().selectors.productServices || [];
   const queries = rules.map((r) => r.query);
   assert.ok(queries.includes('rz-product-services'));
+});
+
+test('config has selector for sticky product carriage block', () => {
+  const rules = loadConfig().selectors.stickyProductCarriage || [];
+  const queries = rules.map((r) => r.query);
+  assert.ok(queries.includes('rz-product-carriage'));
 });

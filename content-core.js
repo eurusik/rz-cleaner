@@ -29,6 +29,7 @@
     EMAIL_SUBSCRIPTION_BANNER: "email-subscription-banner",
     SUPER_OFFER: "super-offer",
     PRODUCT_SERVICES: "product-services",
+    STICKY_PRODUCT_CARRIAGE: "sticky-product-carriage",
     CUSTOM: "custom"
   };
 
@@ -63,6 +64,7 @@
     "rz-marketing-subscription-banner",
     "rz-super-offer",
     "rz-product-services",
+    "rz-product-carriage",
     "rz-store-rich-content",
     "rz-tag-list",
     '[data-testid="advertising-slider"]',
@@ -79,6 +81,7 @@
     ".premium--title",
     ".super-offer",
     ".additional-services-container",
+    ".carriage__main",
     ".rich-content",
     ".tags-list"
   ].join(", ");
@@ -100,6 +103,7 @@
     "RZ-MARKETING-SUBSCRIPTION-BANNER",
     "RZ-SUPER-OFFER",
     "RZ-PRODUCT-SERVICES",
+    "RZ-PRODUCT-CARRIAGE",
     "RZ-STORE-RICH-CONTENT",
     "RZ-TAG-LIST"
   ]);
@@ -116,6 +120,7 @@
     "premium--title",
     "super-offer",
     "additional-services-container",
+    "carriage__main",
     "rich-content",
     "tags-list",
     "max-three-rows"
@@ -134,6 +139,7 @@
     FEATURE.EMAIL_SUBSCRIPTION_BANNER,
     FEATURE.SUPER_OFFER,
     FEATURE.PRODUCT_SERVICES,
+    FEATURE.STICKY_PRODUCT_CARRIAGE,
     FEATURE.CUSTOM
   ];
 

@@ -19,6 +19,7 @@
       hideEmailSubscriptionBanner: true,
       hideSuperOffer: true,
       hideProductServices: true,
+      hideStickyProductCarriage: true,
       normalizePriceLayout: true,
       aiButtonTexts: "rozetka ai",
       aiConsultationTexts: "потрібна консультація\nai-помічник",
@@ -139,6 +140,11 @@
         { query: "rz-product-services" },
         { query: "rz-product-services .additional-services-container", closest: "rz-product-services" },
         { query: "rz-product-services rz-additional-services", closest: "rz-product-services" }
+      ],
+      stickyProductCarriage: [
+        { query: "rz-product-carriage", closest: "rz-product-carriage" },
+        { query: "rz-product-carriage rz-sticky-buy", closest: "rz-product-carriage" },
+        { query: "rz-product-carriage .carriage__main", closest: "rz-product-carriage" }
       ],
       aiTextNodes: "button, a, div, span"
     }
