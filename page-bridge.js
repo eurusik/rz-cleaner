@@ -136,7 +136,12 @@
       const response = await originalFetch.apply(this, args);
       try {
         const cloned = response && typeof response.clone === "function" ? response.clone() : null;
-        if (cloned && typeof cloned.json === "function") {
+        const contentType =
+          cloned && cloned.headers && typeof cloned.headers.get === "function"
+            ? String(cloned.headers.get("content-type") || "").toLowerCase()
+            : "";
+        const looksJson = contentType.includes("application/json");
+        if (cloned && looksJson && typeof cloned.json === "function") {
           cloned.json().then((payload) => processPayload(payload)).catch(() => {});
         }
       } catch (err) {}

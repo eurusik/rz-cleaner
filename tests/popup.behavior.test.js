@@ -77,7 +77,7 @@ test('popup shows only signaled toggles on catalog pages', async () => {
   assert.equal(harness.getById('row-hideAdvertisingSections').hidden, true);
 });
 
-test('popup hides all toggles when no live or same-url snapshot exists', async () => {
+test('popup keeps toggles visible when snapshot is unavailable', async () => {
   const harness = createHarness({
     syncSettings: { enabled: true },
     activeTabUrl: 'https://rozetka.com.ua/ua/apple-iphone-17-pro-256gb-cosmic-orange-mg8h4af-a/p543545585/'
@@ -86,8 +86,8 @@ test('popup hides all toggles when no live or same-url snapshot exists', async (
 
   assert.equal(harness.getById('row-enableTileGallery').hidden, true);
   assert.equal(harness.getById('row-normalizePriceLayout').hidden, true);
-  assert.equal(harness.getById('row-hideAdvertisingSections').hidden, true);
-  assert.equal(harness.getById('row-hidePromoBlocks').hidden, true);
+  assert.equal(harness.getById('row-hideAdvertisingSections').hidden, false);
+  assert.equal(harness.getById('row-hidePromoBlocks').hidden, false);
 });
 
 test('popup applies visibility from diagnostics when live snapshot is unavailable but url matches', async () => {

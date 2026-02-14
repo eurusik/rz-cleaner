@@ -26,11 +26,14 @@ function loadBridgeHarness() {
   vm.createContext(sandbox);
   vm.runInContext(protocolSource, sandbox);
   vm.runInContext(bridgeSource, sandbox);
-  return sandbox.__RZCPageBridgeTest__;
+  return {
+    testApi: sandbox.__RZCPageBridgeTest__,
+    sandbox
+  };
 }
 
 test('page-bridge normalizes product images and excludes non-image urls', () => {
-  const bridge = loadBridgeHarness();
+  const { testApi: bridge } = loadBridgeHarness();
   const product = bridge.normalizeProduct({
     id: 123,
     images: {
@@ -53,7 +56,7 @@ test('page-bridge normalizes product images and excludes non-image urls', () => 
 });
 
 test('page-bridge productsFromPayload deduplicates by id and traverses nested payload', () => {
-  const bridge = loadBridgeHarness();
+  const { testApi: bridge } = loadBridgeHarness();
   const products = bridge.productsFromPayload({
     data: [
       {
@@ -89,4 +92,48 @@ test('page-bridge productsFromPayload deduplicates by id and traverses nested pa
   assert.equal(products.length, 2);
   assert.equal(products[0].id, '1');
   assert.equal(products[1].id, '2');
+});
+
+test('page-bridge skips fetch body json parsing for non-json responses', async () => {
+  let cloneCalls = 0;
+  let jsonCalls = 0;
+  const listeners = new Map();
+  const originalFetchResponse = {
+    clone() {
+      cloneCalls += 1;
+      return {
+        headers: {
+          get() {
+            return 'text/html; charset=utf-8';
+          }
+        },
+        json() {
+          jsonCalls += 1;
+          return Promise.resolve({});
+        }
+      };
+    }
+  };
+  const sandbox = {
+    console,
+    window: {
+      addEventListener(type, cb) {
+        listeners.set(type, cb);
+      },
+      postMessage() {},
+      fetch: async () => originalFetchResponse,
+      XMLHttpRequest: undefined
+    },
+    JSON
+  };
+  sandbox.globalThis = sandbox;
+  vm.createContext(sandbox);
+  vm.runInContext(protocolSource, sandbox);
+  vm.runInContext(bridgeSource, sandbox);
+
+  await sandbox.window.fetch('https://rozetka.com.ua/test');
+  await Promise.resolve();
+
+  assert.equal(cloneCalls, 1);
+  assert.equal(jsonCalls, 0);
 });

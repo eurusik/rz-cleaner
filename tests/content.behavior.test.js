@@ -437,6 +437,74 @@ test('content fetches product page urls when tile has only one image url', async
   assert.equal(tile.getAttribute('data-rzc-tile-gallery-ready'), '1');
 });
 
+test('content retries remote fallback fetch after initial empty result', async () => {
+  let fetchCallCount = 0;
+  const harness = createHarness(
+    {},
+    {
+      fetchImpl: async () => {
+        fetchCallCount += 1;
+        if (fetchCallCount === 1) {
+          return {
+            ok: true,
+            text: async () => `
+              <img src="https://content.rozetka.com.ua/goods/images/original/594346714.jpg">
+            `
+          };
+        }
+        return {
+          ok: true,
+          text: async () => `
+            <img src="https://content.rozetka.com.ua/goods/images/original/594346714.jpg">
+            <img src="https://content.rozetka.com.ua/goods/images/original/594346720.jpg">
+          `
+        };
+      },
+      locationHref: 'https://rozetka.com.ua/ua/mobile-phones/c80003/'
+    }
+  );
+
+  const tile = harness.createElement('rz-product-tile');
+  const imageHost = harness.createElement('a', { classes: ['tile-image-host'] });
+  imageHost.setAttribute('href', '/ua/apple-iphone-17-pro-256gb-deep-blue-mg8j4af-a/p543545605/');
+  const image = harness.createElement('img', { classes: ['tile-image'] });
+  image.setAttribute('src', 'https://content.rozetka.com.ua/goods/images/big_tile/594346714.jpg');
+  imageHost.appendChild(image);
+  tile.appendChild(imageHost);
+
+  harness.document.setQueryResult('rz-product-tile', [tile]);
+  tile.setQueryResult('a.tile-image-host img.tile-image', [image]);
+  tile.setQueryResult('img', [image]);
+  tile.setQueryResult('a.tile-image-host', [imageHost]);
+  tile.setQueryResult('a.tile-image-host[href]', [imageHost]);
+  tile.setQueryResult('a.tile-title[href]', []);
+  tile.setQueryResult("a[href*='/p']", [imageHost]);
+  imageHost.setQueryResult('img', [image]);
+  tile.setQueryResult(`[data-rzc-tile-gallery-btn]`, []);
+
+  await harness.runContent();
+  for (let i = 0; i < 10; i += 1) {
+    await Promise.resolve();
+  }
+
+  let arrows = imageHost.children.filter((node) => node.getAttribute('data-rzc-tile-gallery-btn'));
+  assert.equal(arrows.length, 0);
+  assert.equal(fetchCallCount, 1);
+
+  const hoverHandlers = imageHost.listeners.get('mouseenter') || [];
+  assert.equal(hoverHandlers.length > 0, true);
+  hoverHandlers[0]();
+
+  for (let i = 0; i < 10; i += 1) {
+    await Promise.resolve();
+  }
+
+  arrows = imageHost.children.filter((node) => node.getAttribute('data-rzc-tile-gallery-btn'));
+  assert.equal(fetchCallCount, 2);
+  assert.equal(arrows.length, 2);
+  assert.equal(tile.getAttribute('data-rzc-tile-gallery-ready'), '1');
+});
+
 test('content mounts gallery arrows on tile-image-host instead of wrapper div', async () => {
   const harness = createHarness();
   const tile = harness.createElement('rz-product-tile');

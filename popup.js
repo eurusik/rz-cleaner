@@ -316,10 +316,20 @@
 
   function buildVisibilityMap(activeContext, snapshot) {
     const map = {};
+    const pageType = activeContext && typeof activeContext.pageType === "string" ? activeContext.pageType : "unknown";
     toggleKeys.forEach((key) => {
-      map[key] = false;
+      map[key] = snapshot ? false : true;
     });
-    if (!snapshot) return map;
+    if (!snapshot) {
+      if (pageType === "catalog" || pageType === "product") {
+        toggleKeys.forEach((key) => {
+          if (!CATALOG_ONLY_SCOPES_BY_TOGGLE_KEY[key]) return;
+          const scopes = CATALOG_ONLY_SCOPES_BY_TOGGLE_KEY[key];
+          if (!scopes.includes(pageType)) map[key] = false;
+        });
+      }
+      return map;
+    }
 
     const featureSignals = buildFeatureSignals(snapshot);
     toggleKeys.forEach((key) => {
@@ -329,7 +339,6 @@
       map[key] = featureSignals.get(featureId) === true;
     });
 
-    const pageType = activeContext && typeof activeContext.pageType === "string" ? activeContext.pageType : "unknown";
     if (pageType === "catalog" || pageType === "product") {
       toggleKeys.forEach((key) => {
         if (!CATALOG_ONLY_SCOPES_BY_TOGGLE_KEY[key]) return;

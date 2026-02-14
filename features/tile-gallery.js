@@ -269,28 +269,48 @@
 
     if (REMOTE_CACHE.has(key)) return REMOTE_CACHE.get(key);
 
-    const promise = fetch(href, { credentials: "include" })
+    const inflight = fetch(href, { credentials: "include" })
       .then((response) => {
         if (!response || !response.ok || typeof response.text !== "function") return "";
         return response.text();
       })
       .then((html) => {
         if (!html) return [];
-        const urls = toDisplayUrls(uniqueNonEmpty(extractUrlsFromText(html).filter(isProductImageUrl), 40))
+        return toDisplayUrls(uniqueNonEmpty(extractUrlsFromText(html).filter(isProductImageUrl), 40))
           .filter(isProductImageUrl);
-        if (productId && urls.length >= 2) {
-          CACHE.set(productId, { urls });
-        }
-        return urls;
       })
       .catch(() => [])
       .then((urls) => {
-        REMOTE_CACHE.set(key, Promise.resolve(urls));
-        return urls;
+        const safeUrls = Array.isArray(urls) ? urls : [];
+        if (safeUrls.length >= 2) {
+          if (productId) CACHE.set(productId, { urls: safeUrls });
+          REMOTE_CACHE.set(key, Promise.resolve(safeUrls));
+          return safeUrls;
+        }
+        // Do not keep negative cache forever. Retry is allowed on next hover/touch.
+        REMOTE_CACHE.delete(key);
+        return safeUrls;
       });
 
-    REMOTE_CACHE.set(key, promise);
-    return promise;
+    REMOTE_CACHE.set(key, inflight);
+    return inflight;
+  }
+
+  function unbindRemoteFallback(tile) {
+    if (!tile || tile.nodeType !== Node.ELEMENT_NODE) return;
+    const bindings = tile.__rzcRemoteFetchBindings;
+    if (!bindings || typeof bindings.triggerFetch !== "function" || !Array.isArray(bindings.nodes)) {
+      tile.removeAttribute(FETCH_BOUND_ATTR);
+      return;
+    }
+
+    bindings.nodes.forEach((node) => {
+      if (!node || typeof node.removeEventListener !== "function") return;
+      node.removeEventListener("mouseenter", bindings.triggerFetch);
+      node.removeEventListener("touchstart", bindings.triggerFetch);
+    });
+    tile.__rzcRemoteFetchBindings = null;
+    tile.removeAttribute(FETCH_BOUND_ATTR);
   }
 
   function isNearViewport(node) {
@@ -310,7 +330,10 @@
   function bindRemoteFallback(ctx, tile, host, productId, href) {
     if (!tile || tile.nodeType !== Node.ELEMENT_NODE) return;
     if (!href) return;
-    if (tile.getAttribute(FETCH_BOUND_ATTR) === "1") return;
+    if (tile.__rzcRemoteFetchBindings) return;
+    if (tile.getAttribute(FETCH_BOUND_ATTR) === "1") {
+      tile.removeAttribute(FETCH_BOUND_ATTR);
+    }
 
     const triggerFetch = () => {
       if (tile.getAttribute(READY_ATTR) === "1") return;
@@ -337,9 +360,13 @@
     if (host && host !== tile) triggerNodes.push(host);
     triggerNodes.forEach((node) => {
       if (!node || typeof node.addEventListener !== "function") return;
-      node.addEventListener("mouseenter", triggerFetch, { once: true });
-      node.addEventListener("touchstart", triggerFetch, { once: true, passive: true });
+      node.addEventListener("mouseenter", triggerFetch);
+      node.addEventListener("touchstart", triggerFetch, { passive: true });
     });
+    tile.__rzcRemoteFetchBindings = {
+      triggerFetch,
+      nodes: triggerNodes
+    };
 
     if (autoRemoteFetchScheduled < AUTO_REMOTE_FETCH_LIMIT && tile.getAttribute(FETCH_AUTO_ATTR) !== "1") {
       autoRemoteFetchScheduled += 1;
@@ -692,6 +719,7 @@
       bindRemoteFallback(ctx, tile, host, productId, readProductHref(tile));
       return;
     }
+    unbindRemoteFallback(tile);
     log("tile-urls-ready", {
       productId,
       fromCache: cacheUrls.length >= 2,
@@ -774,6 +802,7 @@
   function removeTileGalleries(ctx, root) {
     const scope = root && root.querySelectorAll ? root : document;
     ctx.safeQueryAll(scope, "rz-product-tile").forEach((tile) => {
+      unbindRemoteFallback(tile);
       tile.removeAttribute(READY_ATTR);
       tile.removeAttribute(URLS_ATTR);
       tile.removeAttribute(INDEX_ATTR);
