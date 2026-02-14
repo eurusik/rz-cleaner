@@ -7,7 +7,9 @@
     hiddenClass: "rzc-hidden",
     defaults: {
       hidePromoBlocks: true,
+      hidePromoLabels: true,
       hideRedBonusBlocks: true,
+      hideBonusPoints: true,
       hideAdvertisingSections: true,
       hideQuickFilters: true,
       hideRozetkaAI: true,
@@ -15,6 +17,8 @@
       hidePopularSearchChips: true,
       hideSmartDeliveryBadge: true,
       hideEmailSubscriptionBanner: true,
+      hideSuperOffer: true,
+      hideProductServices: true,
       normalizePriceLayout: true,
       aiButtonTexts: "rozetka ai",
       aiConsultationTexts: "потрібна консультація\nai-помічник",
@@ -32,11 +36,21 @@
         { query: "rz-product-banner" },
         { query: "rz-product-banner .product-banner", closest: "rz-product-banner" }
       ],
+      promoLabels: [
+        { query: "rz-product-tile rz-promo-label.tile-promo-label" },
+        { query: "rz-product-tile rz-promo-label.promo-label" },
+        { query: "rz-product-tile rz-promo-label[class*='promo-label_type_']" }
+      ],
       redBonus: [
         { query: "rz-tile-bonus .bonus__red", closest: "rz-tile-bonus" },
         { query: "rz-tile-bonus .red-icon", closest: "rz-tile-bonus" },
         { query: "rz-product-red-bonus" },
         { query: "rz-product-red-bonus .loyalty__red-card", closest: "rz-product-red-bonus" }
+      ],
+      bonusPoints: [
+        { query: "rz-product-tile rz-tile-bonus", closest: "rz-tile-bonus" },
+        { query: "rz-tile-bonus .bonus", closest: "rz-tile-bonus" },
+        { query: "rz-tile-bonus use[href*='#icon-bonus']", closest: "rz-tile-bonus" }
       ],
       advertising: [
         { query: 'rz-section-slider[data-testid="advertising-slider"]' },
@@ -115,6 +129,16 @@
           query: "rz-marketing-subscription-banner rz-modal-close-btn",
           closest: "rz-marketing-subscription-banner"
         }
+      ],
+      superOffer: [
+        { query: "rz-super-offer" },
+        { query: "rz-super-offer [data-testid='super-offer']", closest: "rz-super-offer" },
+        { query: "rz-super-offer .super-offer", closest: "rz-super-offer" }
+      ],
+      productServices: [
+        { query: "rz-product-services" },
+        { query: "rz-product-services .additional-services-container", closest: "rz-product-services" },
+        { query: "rz-product-services rz-additional-services", closest: "rz-product-services" }
       ],
       aiTextNodes: "button, a, div, span"
     }

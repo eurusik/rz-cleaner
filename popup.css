@@ -71,6 +71,11 @@ body {
   color: var(--muted);
 }
 
+.master-hint-pause {
+  color: #8f4b00;
+  font-weight: 600;
+}
+
 .row {
   display: flex;
   align-items: center;
@@ -93,6 +98,9 @@ body {
 }
 
 .actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   margin-top: 10px;
 }
 
@@ -108,6 +116,10 @@ body {
 
 .btn:hover {
   border-color: #c9ccd5;
+}
+
+.btn.btn-secondary {
+  background: #fbfcfd;
 }
 
 .status {

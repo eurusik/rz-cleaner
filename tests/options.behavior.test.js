@@ -89,7 +89,11 @@ test('recommended settings button enables extension and applies defaults', async
     syncSettings: {
       enabled: false,
       hideAdvertisingSections: false,
-      hideSmartDeliveryBadge: false
+      hidePromoLabels: false,
+      hideBonusPoints: false,
+      hideSmartDeliveryBadge: false,
+      hideSuperOffer: false,
+      hideProductServices: false
     }
   });
   await harness.runOptions();
@@ -100,7 +104,11 @@ test('recommended settings button enables extension and applies defaults', async
   const lastCall = harness.syncSetCalls[harness.syncSetCalls.length - 1];
   assert.equal(lastCall.rzc_settings.enabled, true);
   assert.equal(lastCall.rzc_settings.hideAdvertisingSections, true);
+  assert.equal(lastCall.rzc_settings.hidePromoLabels, true);
+  assert.equal(lastCall.rzc_settings.hideBonusPoints, true);
   assert.equal(lastCall.rzc_settings.hideSmartDeliveryBadge, true);
+  assert.equal(lastCall.rzc_settings.hideSuperOffer, true);
+  assert.equal(lastCall.rzc_settings.hideProductServices, true);
 });
 
 test('run diagnostics now opens diagnostics section', async () => {

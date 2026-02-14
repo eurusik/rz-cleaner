@@ -14,6 +14,10 @@ function mustContainIn(text, snippet, name) {
 test('options.html has toggles for smart and email features', () => {
   mustContainIn(html, 'id="hideSmartDeliveryBadge"', 'options.html');
   mustContainIn(html, 'id="hideEmailSubscriptionBanner"', 'options.html');
+  mustContainIn(html, 'id="hideSuperOffer"', 'options.html');
+  mustContainIn(html, 'id="hideProductServices"', 'options.html');
+  mustContainIn(html, 'id="hidePromoLabels"', 'options.html');
+  mustContainIn(html, 'id="hideBonusPoints"', 'options.html');
   mustContainIn(html, 'id="extensionEnabled"', 'options.html');
   mustContainIn(html, 'id="applyRecommendedSettings"', 'options.html');
   mustContainIn(html, 'id="runDiagnosticsNow"', 'options.html');
@@ -24,16 +28,32 @@ test('options.html has toggles for smart and email features', () => {
 test('options.js maps settings keys for smart and email features', () => {
   mustContainIn(js, '"smart-delivery-badge": "hideSmartDeliveryBadge"', 'options.js');
   mustContainIn(js, '"email-subscription-banner": "hideEmailSubscriptionBanner"', 'options.js');
+  mustContainIn(js, '"super-offer": "hideSuperOffer"', 'options.js');
+  mustContainIn(js, '"product-services": "hideProductServices"', 'options.js');
+  mustContainIn(js, '"promo-labels": "hidePromoLabels"', 'options.js');
+  mustContainIn(js, '"bonus-points": "hideBonusPoints"', 'options.js');
 });
 
 test('options.js has diagnostics labels for smart and email features', () => {
   mustContainIn(js, '"smart-delivery-badge": "Smart-блоки (бейдж + підписка Smart)"', 'options.js');
   mustContainIn(js, '"email-subscription-banner": "Банер підписки на email"', 'options.js');
+  mustContainIn(js, '"super-offer": "Блок “Рекомендуємо” (Super Offer)"', 'options.js');
+  mustContainIn(js, '"product-services": "Блок “Додаткові послуги”"', 'options.js');
+  mustContainIn(js, '"promo-labels": "Promo-бейджі (ТОП ПРОДАЖІВ / НОВИНКА / -%)"', 'options.js');
+  mustContainIn(js, '"bonus-points": "Рядок “+ N бонусних ₴”"', 'options.js');
 });
 
 test('options.js includes built-in selectors sections for smart and email', () => {
   mustContainIn(js, 'const smartDeliveryBadge = (SELECTORS.smartDeliveryBadge || [])', 'options.js');
   mustContainIn(js, 'const emailSubscriptionBanner = (SELECTORS.emailSubscriptionBanner || [])', 'options.js');
+  mustContainIn(js, 'const superOffer = (SELECTORS.superOffer || [])', 'options.js');
+  mustContainIn(js, 'const productServices = (SELECTORS.productServices || [])', 'options.js');
+  mustContainIn(js, 'const promoLabels = (SELECTORS.promoLabels || [])', 'options.js');
+  mustContainIn(js, 'const bonusPoints = (SELECTORS.bonusPoints || [])', 'options.js');
+  mustContainIn(js, '# Promo labels selectors (built-in)', 'options.js');
+  mustContainIn(js, '# Bonus points selectors (built-in)', 'options.js');
   mustContainIn(js, '# Smart delivery badge selectors (built-in)', 'options.js');
   mustContainIn(js, '# Email subscription banner selectors (built-in)', 'options.js');
+  mustContainIn(js, '# Super offer selectors (built-in)', 'options.js');
+  mustContainIn(js, '# Product services selectors (built-in)', 'options.js');
 });

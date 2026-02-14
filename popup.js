@@ -5,17 +5,18 @@
   const STORAGE_KEY = CONFIG.storageKey || "rzc_settings";
   const DEFAULTS = CONFIG.defaults || {};
   const ENABLED_KEY = "enabled";
+  const PAUSE_UNTIL_KEY = "pauseUntil";
+  const ONE_HOUR_MS = 60 * 60 * 1000;
   const statusEl = document.getElementById("status");
+  const pauseInfoEl = document.getElementById("pauseInfo");
   const extensionEnabledEl = document.getElementById("extensionEnabled");
+  const disableOneHourBtn = document.getElementById("disableOneHour");
   const togglesEl = document.querySelector(".toggles");
 
   const quickKeys = [
     "hideAdvertisingSections",
-    "hideSmartDeliveryBadge",
-    "hideEmailSubscriptionBanner",
     "hidePromoBlocks",
-    "hideRedBonusBlocks",
-    "hideRozetkaAI",
+    "hideSmartDeliveryBadge",
     "normalizePriceLayout"
   ].filter((key) => key in DEFAULTS);
 
@@ -35,13 +36,13 @@
   function loadSettings() {
     return new Promise((resolve) => {
       if (!chrome.storage || !chrome.storage.sync) {
-        resolve({ ...DEFAULTS, [ENABLED_KEY]: true });
+        resolve({ ...DEFAULTS, [ENABLED_KEY]: true, [PAUSE_UNTIL_KEY]: 0 });
         return;
       }
 
       chrome.storage.sync.get({ ...DEFAULTS, [STORAGE_KEY]: null }, (stored) => {
         if (chrome.runtime && chrome.runtime.lastError) {
-          resolve({ ...DEFAULTS });
+          resolve({ ...DEFAULTS, [ENABLED_KEY]: true, [PAUSE_UNTIL_KEY]: 0 });
           return;
         }
 
@@ -57,6 +58,7 @@
 
         const merged = { ...DEFAULTS, ...legacy, ...namespaced };
         if (!(ENABLED_KEY in merged)) merged[ENABLED_KEY] = true;
+        if (!Number.isFinite(Number(merged[PAUSE_UNTIL_KEY]))) merged[PAUSE_UNTIL_KEY] = 0;
         resolve(merged);
       });
     });
@@ -86,6 +88,29 @@
     });
   }
 
+  function isPaused(settings) {
+    return Number(settings[PAUSE_UNTIL_KEY] || 0) > Date.now();
+  }
+
+  function isEffectivelyEnabled(settings) {
+    return settings[ENABLED_KEY] !== false && !isPaused(settings);
+  }
+
+  function formatPauseTime(ts) {
+    const time = new Date(ts);
+    return time.toLocaleTimeString("uk-UA", { hour: "2-digit", minute: "2-digit" });
+  }
+
+  function renderPauseInfo(settings) {
+    if (!pauseInfoEl) return;
+    const pauseUntil = Number(settings[PAUSE_UNTIL_KEY] || 0);
+    if (pauseUntil > Date.now()) {
+      pauseInfoEl.textContent = `Пауза до ${formatPauseTime(pauseUntil)}`;
+      return;
+    }
+    pauseInfoEl.textContent = "";
+  }
+
   function updateQuickTogglesState(enabled) {
     if (togglesEl) togglesEl.classList.toggle("is-disabled", !enabled);
     quickKeys.forEach((key) => {
@@ -93,18 +118,36 @@
       if (!input) return;
       input.disabled = !enabled;
     });
+    if (disableOneHourBtn) disableOneHourBtn.disabled = !enabled;
   }
 
   loadSettings().then((settings) => {
     const currentSettings = { ...settings };
+    const applyEffectiveState = () => {
+      const effectiveEnabled = isEffectivelyEnabled(currentSettings);
+      if (extensionEnabledEl) extensionEnabledEl.checked = effectiveEnabled;
+      updateQuickTogglesState(effectiveEnabled);
+      renderPauseInfo(currentSettings);
+    };
+
+    applyEffectiveState();
 
     if (extensionEnabledEl) {
-      extensionEnabledEl.checked = currentSettings[ENABLED_KEY] !== false;
-      updateQuickTogglesState(extensionEnabledEl.checked);
       extensionEnabledEl.addEventListener("change", () => {
         currentSettings[ENABLED_KEY] = extensionEnabledEl.checked;
-        updateQuickTogglesState(extensionEnabledEl.checked);
+        currentSettings[PAUSE_UNTIL_KEY] = 0;
+        applyEffectiveState();
         saveSettings(currentSettings);
+      });
+    }
+
+    if (disableOneHourBtn) {
+      disableOneHourBtn.addEventListener("click", () => {
+        currentSettings[ENABLED_KEY] = true;
+        currentSettings[PAUSE_UNTIL_KEY] = Date.now() + ONE_HOUR_MS;
+        applyEffectiveState();
+        saveSettings(currentSettings);
+        showStatus("Пауза на 1 год увімкнена", "ok");
       });
     }
 

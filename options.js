@@ -34,7 +34,9 @@
   const textKeys = Object.keys(DEFAULTS).filter((k) => typeof DEFAULTS[k] === "string");
   const FEATURE_LABELS = {
     "promo-main": "Додаткова ціна “за Карткою Rozetka”",
+    "promo-labels": "Promo-бейджі (ТОП ПРОДАЖІВ / НОВИНКА / -%)",
     "red-bonus": "Бонусні блоки за оплату карткою",
+    "bonus-points": "Рядок “+ N бонусних ₴”",
     advertising: "Рекламні каруселі та рекламні картки",
     "quick-filters": "Блок “Швидкі фільтри”",
     "ai-button": "Кнопка Rozetka AI",
@@ -42,11 +44,15 @@
     "popular-search-chips": "Блок “Популярні запити”",
     "smart-delivery-badge": "Smart-блоки (бейдж + підписка Smart)",
     "email-subscription-banner": "Банер підписки на email",
+    "super-offer": "Блок “Рекомендуємо” (Super Offer)",
+    "product-services": "Блок “Додаткові послуги”",
     custom: "Додаткові CSS-селектори"
   };
   const FEATURE_SETTING_KEYS = {
     "promo-main": "hidePromoBlocks",
+    "promo-labels": "hidePromoLabels",
     "red-bonus": "hideRedBonusBlocks",
+    "bonus-points": "hideBonusPoints",
     advertising: "hideAdvertisingSections",
     "quick-filters": "hideQuickFilters",
     "ai-button": "hideRozetkaAI",
@@ -54,6 +60,8 @@
     "popular-search-chips": "hidePopularSearchChips",
     "smart-delivery-badge": "hideSmartDeliveryBadge",
     "email-subscription-banner": "hideEmailSubscriptionBanner",
+    "super-offer": "hideSuperOffer",
+    "product-services": "hideProductServices",
     custom: "customHideSelectors"
   };
   let statusTimer = 0;
@@ -243,6 +251,12 @@
     const redBonus = (SELECTORS.redBonus || [])
       .map((rule) => (rule && rule.query ? rule.query : ""))
       .filter(Boolean);
+    const bonusPoints = (SELECTORS.bonusPoints || [])
+      .map((rule) => (rule && rule.query ? rule.query : ""))
+      .filter(Boolean);
+    const promoLabels = (SELECTORS.promoLabels || [])
+      .map((rule) => (rule && rule.query ? rule.query : ""))
+      .filter(Boolean);
 
     const advertising = (SELECTORS.advertising || [])
       .map((rule) => (rule && rule.query ? rule.query : ""))
@@ -263,17 +277,27 @@
     const emailSubscriptionBanner = (SELECTORS.emailSubscriptionBanner || [])
       .map((rule) => (rule && rule.query ? rule.query : ""))
       .filter(Boolean);
+    const superOffer = (SELECTORS.superOffer || [])
+      .map((rule) => (rule && rule.query ? rule.query : ""))
+      .filter(Boolean);
+    const productServices = (SELECTORS.productServices || [])
+      .map((rule) => (rule && rule.query ? rule.query : ""))
+      .filter(Boolean);
 
     return {
       promoMain,
+      promoLabels,
       redBonus,
+      bonusPoints,
       advertising,
       quickFilters,
       aiButton,
       aiConsultation,
       popularSearchChips,
       smartDeliveryBadge,
-      emailSubscriptionBanner
+      emailSubscriptionBanner,
+      superOffer,
+      productServices
     };
   }
 
@@ -291,8 +315,14 @@
       "# Promo selectors (built-in)",
       ...builtIn.promoMain,
       "",
+      "# Promo labels selectors (built-in)",
+      ...builtIn.promoLabels,
+      "",
       "# Red bonus selectors (built-in)",
       ...builtIn.redBonus,
+      "",
+      "# Bonus points selectors (built-in)",
+      ...builtIn.bonusPoints,
       "",
       "# Advertising selectors (built-in)",
       ...builtIn.advertising,
@@ -314,6 +344,12 @@
       "",
       "# Email subscription banner selectors (built-in)",
       ...builtIn.emailSubscriptionBanner,
+      "",
+      "# Super offer selectors (built-in)",
+      ...builtIn.superOffer,
+      "",
+      "# Product services selectors (built-in)",
+      ...builtIn.productServices,
       "",
       "# Запасний пошук: кнопка AI",
       ...aiButtonTexts,

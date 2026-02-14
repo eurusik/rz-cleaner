@@ -30,14 +30,18 @@ test('each boolean default has a checkbox in options.html', () => {
 test('each supported feature toggle has a mapping in options.js', () => {
   const requiredMappings = [
     'hidePromoBlocks',
+    'hidePromoLabels',
     'hideRedBonusBlocks',
+    'hideBonusPoints',
     'hideAdvertisingSections',
     'hideQuickFilters',
     'hideRozetkaAI',
     'hideAiConsultationBlock',
     'hidePopularSearchChips',
     'hideSmartDeliveryBadge',
-    'hideEmailSubscriptionBanner'
+    'hideEmailSubscriptionBanner',
+    'hideSuperOffer',
+    'hideProductServices'
   ];
 
   for (const settingKey of requiredMappings) {
@@ -48,7 +52,9 @@ test('each supported feature toggle has a mapping in options.js', () => {
 test('content cleanup pipeline includes all major hide steps', () => {
   const requiredCalls = [
     'hidePromoPrices(root, settings);',
+    'hidePromoLabels(root, settings);',
     'hideRedBonusBlocks(root, settings);',
+    'hideBonusPoints(root, settings);',
     'hideAdvertisingSections(root, settings);',
     'hideQuickFilters(root, settings);',
     'hideRozetkaAIWidget(root, settings);',
@@ -56,6 +62,8 @@ test('content cleanup pipeline includes all major hide steps', () => {
     'hidePopularSearchChips(root, settings);',
     'hideSmartDeliveryBadge(root, settings);',
     'hideEmailSubscriptionBanner(root, settings);',
+    'hideSuperOffer(root, settings);',
+    'hideProductServices(root, settings);',
     'hideCustomSelectors(root, settings);'
   ];
 

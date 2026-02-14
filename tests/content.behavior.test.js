@@ -24,6 +24,12 @@ function wireSmartAndEmailSelectors(harness, targets) {
   document.setQueryResult('rz-marketing-subscription-banner', [targets.emailBanner]);
   document.setQueryResult('rz-marketing-subscription-banner .content', [targets.emailBannerContent]);
   document.setQueryResult('rz-marketing-subscription-banner rz-modal-close-btn', [targets.emailBannerClose]);
+  document.setQueryResult('rz-super-offer', [targets.superOffer]);
+  document.setQueryResult("rz-super-offer [data-testid='super-offer']", [targets.superOfferInner]);
+  document.setQueryResult('rz-super-offer .super-offer', [targets.superOfferContent]);
+  document.setQueryResult('rz-product-services', [targets.productServices]);
+  document.setQueryResult('rz-product-services .additional-services-container', [targets.productServicesContainer]);
+  document.setQueryResult('rz-product-services rz-additional-services', [targets.productServicesInner]);
 }
 
 function makeTargets(harness) {
@@ -43,6 +49,19 @@ function makeTargets(harness) {
   emailBanner.appendChild(emailBannerContent);
   emailBanner.appendChild(emailBannerClose);
 
+  const superOffer = harness.createElement('rz-super-offer');
+  const superOfferInner = harness.createElement('div');
+  superOfferInner.setAttribute('data-testid', 'super-offer');
+  const superOfferContent = harness.createElement('div', { classes: ['super-offer'] });
+  superOffer.appendChild(superOfferInner);
+  superOffer.appendChild(superOfferContent);
+
+  const productServices = harness.createElement('rz-product-services');
+  const productServicesContainer = harness.createElement('div', { classes: ['additional-services-container'] });
+  const productServicesInner = harness.createElement('rz-additional-services');
+  productServices.appendChild(productServicesContainer);
+  productServices.appendChild(productServicesInner);
+
   return {
     deliveryPrice,
     deliveryPriceIcon,
@@ -51,7 +70,13 @@ function makeTargets(harness) {
     deliveryPremiumIcon,
     emailBanner,
     emailBannerContent,
-    emailBannerClose
+    emailBannerClose,
+    superOffer,
+    superOfferInner,
+    superOfferContent,
+    productServices,
+    productServicesContainer,
+    productServicesInner
   };
 }
 
@@ -65,12 +90,16 @@ test('content hides smart delivery and email banner blocks on initial cleanup', 
   assert.equal(isHidden(targets.deliveryPrice), true);
   assert.equal(isHidden(targets.deliveryPremium), true);
   assert.equal(isHidden(targets.emailBanner), true);
+  assert.equal(isHidden(targets.superOffer), true);
+  assert.equal(isHidden(targets.productServices), true);
 });
 
 test('content does not hide smart/email when toggles are disabled from settings', async () => {
   const harness = createHarness({
     hideSmartDeliveryBadge: false,
-    hideEmailSubscriptionBanner: false
+    hideEmailSubscriptionBanner: false,
+    hideSuperOffer: false,
+    hideProductServices: false
   });
   const targets = makeTargets(harness);
   wireSmartAndEmailSelectors(harness, targets);
@@ -80,12 +109,16 @@ test('content does not hide smart/email when toggles are disabled from settings'
   assert.equal(isHidden(targets.deliveryPrice), false);
   assert.equal(isHidden(targets.deliveryPremium), false);
   assert.equal(isHidden(targets.emailBanner), false);
+  assert.equal(isHidden(targets.superOffer), false);
+  assert.equal(isHidden(targets.productServices), false);
 });
 
 test('content does not apply hiding when extension is globally disabled', async () => {
   const harness = createHarness({
     hideSmartDeliveryBadge: true,
     hideEmailSubscriptionBanner: true,
+    hideSuperOffer: true,
+    hideProductServices: true,
     enabled: false
   });
   const targets = makeTargets(harness);
@@ -96,6 +129,29 @@ test('content does not apply hiding when extension is globally disabled', async 
   assert.equal(isHidden(targets.deliveryPrice), false);
   assert.equal(isHidden(targets.deliveryPremium), false);
   assert.equal(isHidden(targets.emailBanner), false);
+  assert.equal(isHidden(targets.superOffer), false);
+  assert.equal(isHidden(targets.productServices), false);
+});
+
+test('content does not apply hiding when extension is paused', async () => {
+  const harness = createHarness({
+    hideSmartDeliveryBadge: true,
+    hideEmailSubscriptionBanner: true,
+    hideSuperOffer: true,
+    hideProductServices: true,
+    enabled: true,
+    pauseUntil: 9999999999999
+  });
+  const targets = makeTargets(harness);
+  wireSmartAndEmailSelectors(harness, targets);
+
+  await harness.runContent();
+
+  assert.equal(isHidden(targets.deliveryPrice), false);
+  assert.equal(isHidden(targets.deliveryPremium), false);
+  assert.equal(isHidden(targets.emailBanner), false);
+  assert.equal(isHidden(targets.superOffer), false);
+  assert.equal(isHidden(targets.productServices), false);
 });
 
 test('content reveals blocks when settings toggle off via storage change', async () => {
@@ -106,16 +162,58 @@ test('content reveals blocks when settings toggle off via storage change', async
   await harness.runContent();
   assert.equal(isHidden(targets.deliveryPrice), true);
   assert.equal(isHidden(targets.emailBanner), true);
+  assert.equal(isHidden(targets.superOffer), true);
+  assert.equal(isHidden(targets.productServices), true);
 
   await harness.emitSettingsChange({
     hideSmartDeliveryBadge: false,
-    hideEmailSubscriptionBanner: false
+    hideEmailSubscriptionBanner: false,
+    hideSuperOffer: false,
+    hideProductServices: false
   });
 
   assert.equal(targets.deliveryPrice.getAttribute(HIDDEN_ATTR), null);
   assert.equal(targets.deliveryPrice.classList.contains(HIDDEN_CLASS), false);
   assert.equal(targets.emailBanner.getAttribute(HIDDEN_ATTR), null);
   assert.equal(targets.emailBanner.classList.contains(HIDDEN_CLASS), false);
+  assert.equal(targets.superOffer.getAttribute(HIDDEN_ATTR), null);
+  assert.equal(targets.superOffer.classList.contains(HIDDEN_CLASS), false);
+  assert.equal(targets.productServices.getAttribute(HIDDEN_ATTR), null);
+  assert.equal(targets.productServices.classList.contains(HIDDEN_CLASS), false);
+});
+
+test('content applies hiding after pause ends via storage change', async () => {
+  const harness = createHarness({
+    hideSmartDeliveryBadge: true,
+    hideEmailSubscriptionBanner: true,
+    hideSuperOffer: true,
+    hideProductServices: true,
+    enabled: true,
+    pauseUntil: 9999999999999
+  });
+  const targets = makeTargets(harness);
+  wireSmartAndEmailSelectors(harness, targets);
+
+  await harness.runContent();
+  assert.equal(isHidden(targets.deliveryPrice), false);
+  assert.equal(isHidden(targets.emailBanner), false);
+  assert.equal(isHidden(targets.superOffer), false);
+  assert.equal(isHidden(targets.productServices), false);
+
+  await harness.emitSettingsChange({
+    hideSmartDeliveryBadge: true,
+    hideEmailSubscriptionBanner: true,
+    hideSuperOffer: true,
+    hideProductServices: true,
+    enabled: true,
+    pauseUntil: 0
+  });
+
+  assert.equal(isHidden(targets.deliveryPrice), true);
+  assert.equal(isHidden(targets.deliveryPremium), true);
+  assert.equal(isHidden(targets.emailBanner), true);
+  assert.equal(isHidden(targets.superOffer), true);
+  assert.equal(isHidden(targets.productServices), true);
 });
 
 test('observer childList mutation triggers cleanup for dynamically added delivery price block', async () => {

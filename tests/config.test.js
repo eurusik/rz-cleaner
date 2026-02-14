@@ -25,7 +25,9 @@ test('config defaults include all boolean toggles', () => {
   const defaults = loadConfig().defaults;
   const expected = [
     'hidePromoBlocks',
+    'hidePromoLabels',
     'hideRedBonusBlocks',
+    'hideBonusPoints',
     'hideAdvertisingSections',
     'hideQuickFilters',
     'hideRozetkaAI',
@@ -33,6 +35,8 @@ test('config defaults include all boolean toggles', () => {
     'hidePopularSearchChips',
     'hideSmartDeliveryBadge',
     'hideEmailSubscriptionBanner',
+    'hideSuperOffer',
+    'hideProductServices',
     'normalizePriceLayout'
   ];
 
@@ -54,4 +58,16 @@ test('config has selector for marketing email banner', () => {
   const rules = loadConfig().selectors.emailSubscriptionBanner || [];
   const queries = rules.map((r) => r.query);
   assert.ok(queries.includes('rz-marketing-subscription-banner'));
+});
+
+test('config has selector for super offer block', () => {
+  const rules = loadConfig().selectors.superOffer || [];
+  const queries = rules.map((r) => r.query);
+  assert.ok(queries.includes('rz-super-offer'));
+});
+
+test('config has selector for product services block', () => {
+  const rules = loadConfig().selectors.productServices || [];
+  const queries = rules.map((r) => r.query);
+  assert.ok(queries.includes('rz-product-services'));
 });

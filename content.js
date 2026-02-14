@@ -14,7 +14,9 @@
 
   const FEATURE = {
     PROMO_MAIN: "promo-main",
+    PROMO_LABELS: "promo-labels",
     RED_BONUS: "red-bonus",
+    BONUS_POINTS: "bonus-points",
     ADVERTISING: "advertising",
     QUICK_FILTERS: "quick-filters",
     AI_BUTTON: "ai-button",
@@ -22,6 +24,8 @@
     POPULAR_SEARCH_CHIPS: "popular-search-chips",
     SMART_DELIVERY_BADGE: "smart-delivery-badge",
     EMAIL_SUBSCRIPTION_BANNER: "email-subscription-banner",
+    SUPER_OFFER: "super-offer",
+    PRODUCT_SERVICES: "product-services",
     CUSTOM: "custom"
   };
 
@@ -40,6 +44,7 @@
   const OBSERVER_HINT_SELECTOR = [
     "rz-product-tile",
     "rz-red-price",
+    "rz-promo-label",
     "rz-product-banner",
     "rz-tile-bonus",
     "rz-product-red-bonus",
@@ -52,10 +57,14 @@
     "rz-delivery-premium",
     "rz-delivery-price",
     "rz-marketing-subscription-banner",
+    "rz-super-offer",
+    "rz-product-services",
     "rz-tag-list",
     '[data-testid="advertising-slider"]',
     '[data-testid="promo-price"]',
     ".red-label",
+    ".tile-promo-label",
+    ".promo-label",
     ".red-icon",
     ".bonus__red",
     ".loyalty__red-card",
@@ -63,11 +72,14 @@
     ".product-anchor-links__list-wrapper",
     ".tile-smart-icon",
     ".premium--title",
+    ".super-offer",
+    ".additional-services-container",
     ".tags-list"
   ].join(", ");
   const HINT_TAGS = new Set([
     "RZ-PRODUCT-TILE",
     "RZ-RED-PRICE",
+    "RZ-PROMO-LABEL",
     "RZ-PRODUCT-BANNER",
     "RZ-TILE-BONUS",
     "RZ-PRODUCT-RED-BONUS",
@@ -80,10 +92,14 @@
     "RZ-DELIVERY-PREMIUM",
     "RZ-DELIVERY-PRICE",
     "RZ-MARKETING-SUBSCRIPTION-BANNER",
+    "RZ-SUPER-OFFER",
+    "RZ-PRODUCT-SERVICES",
     "RZ-TAG-LIST"
   ]);
   const HINT_CLASSES = [
     "red-label",
+    "tile-promo-label",
+    "promo-label",
     "red-icon",
     "bonus__red",
     "loyalty__red-card",
@@ -91,12 +107,16 @@
     "product-anchor-links__list-wrapper",
     "tile-smart-icon",
     "premium--title",
+    "super-offer",
+    "additional-services-container",
     "tags-list",
     "max-three-rows"
   ];
   const MANAGED_FEATURES = [
     FEATURE.PROMO_MAIN,
+    FEATURE.PROMO_LABELS,
     FEATURE.RED_BONUS,
+    FEATURE.BONUS_POINTS,
     FEATURE.ADVERTISING,
     FEATURE.QUICK_FILTERS,
     FEATURE.AI_BUTTON,
@@ -104,6 +124,8 @@
     FEATURE.POPULAR_SEARCH_CHIPS,
     FEATURE.SMART_DELIVERY_BADGE,
     FEATURE.EMAIL_SUBSCRIPTION_BANNER,
+    FEATURE.SUPER_OFFER,
+    FEATURE.PRODUCT_SERVICES,
     FEATURE.CUSTOM
   ];
 
@@ -308,8 +330,16 @@
     return SELECTORS.promoMain || SELECTORS.promo || [];
   }
 
+  function promoLabelRules() {
+    return SELECTORS.promoLabels || [];
+  }
+
   function redBonusRules() {
     return SELECTORS.redBonus || [];
+  }
+
+  function bonusPointsRules() {
+    return SELECTORS.bonusPoints || [];
   }
 
   function advertisingRules() {
@@ -338,6 +368,14 @@
 
   function emailSubscriptionBannerRules() {
     return SELECTORS.emailSubscriptionBanner || [];
+  }
+
+  function superOfferRules() {
+    return SELECTORS.superOffer || [];
+  }
+
+  function productServicesRules() {
+    return SELECTORS.productServices || [];
   }
 
   function countUniqueMatchesByRules(scope, rules) {
@@ -371,68 +409,100 @@
     return phrases.some((needle) => pageText.includes(needle));
   }
 
+  function isExtensionEnabled(settings) {
+    if (!settings || settings.enabled === false) return false;
+    const pauseUntil = Number(settings.pauseUntil || 0);
+    if (pauseUntil > Date.now()) return false;
+    return true;
+  }
+
   function getDiagnosticsFeatureEntries(settings, scope) {
     const customSelectors = settings.customHideSelectorList || [];
     const pageText = (scope.textContent || "").toLowerCase();
+    const extensionEnabled = isExtensionEnabled(settings);
 
     return [
       {
         id: FEATURE.PROMO_MAIN,
-        enabled: Boolean(settings.hidePromoBlocks),
+        enabled: extensionEnabled && Boolean(settings.hidePromoBlocks),
         selectorMatches: countUniqueMatchesByRules(scope, promoRules()),
         textMatch: null
       },
       {
+        id: FEATURE.PROMO_LABELS,
+        enabled: extensionEnabled && Boolean(settings.hidePromoLabels),
+        selectorMatches: countUniqueMatchesByRules(scope, promoLabelRules()),
+        textMatch: null
+      },
+      {
         id: FEATURE.RED_BONUS,
-        enabled: Boolean(settings.hideRedBonusBlocks),
+        enabled: extensionEnabled && Boolean(settings.hideRedBonusBlocks),
         selectorMatches: countUniqueMatchesByRules(scope, redBonusRules()),
         textMatch: null
       },
       {
+        id: FEATURE.BONUS_POINTS,
+        enabled: extensionEnabled && Boolean(settings.hideBonusPoints),
+        selectorMatches: countUniqueMatchesByRules(scope, bonusPointsRules()),
+        textMatch: null
+      },
+      {
         id: FEATURE.ADVERTISING,
-        enabled: Boolean(settings.hideAdvertisingSections),
+        enabled: extensionEnabled && Boolean(settings.hideAdvertisingSections),
         selectorMatches: countUniqueMatchesByRules(scope, advertisingRules()),
         textMatch: hasTextFallbackSignal(pageText, settings.advertisingTextList)
       },
       {
         id: FEATURE.QUICK_FILTERS,
-        enabled: Boolean(settings.hideQuickFilters),
+        enabled: extensionEnabled && Boolean(settings.hideQuickFilters),
         selectorMatches: countUniqueMatchesByRules(scope, quickFiltersRules()),
         textMatch: hasTextFallbackSignal(pageText, settings.quickFiltersTextList)
       },
       {
         id: FEATURE.AI_BUTTON,
-        enabled: Boolean(settings.hideRozetkaAI),
+        enabled: extensionEnabled && Boolean(settings.hideRozetkaAI),
         selectorMatches: countUniqueMatchesBySelectors(scope, aiButtonSelectors()),
         textMatch: hasTextFallbackSignal(pageText, settings.aiButtonTextList)
       },
       {
         id: FEATURE.AI_CONSULT,
-        enabled: Boolean(settings.hideAiConsultationBlock),
+        enabled: extensionEnabled && Boolean(settings.hideAiConsultationBlock),
         selectorMatches: countUniqueMatchesBySelectors(scope, aiConsultationSelectors()),
         textMatch: hasTextFallbackSignal(pageText, settings.aiConsultationTextList)
       },
       {
         id: FEATURE.POPULAR_SEARCH_CHIPS,
-        enabled: Boolean(settings.hidePopularSearchChips),
+        enabled: extensionEnabled && Boolean(settings.hidePopularSearchChips),
         selectorMatches: countUniqueMatchesByRules(scope, popularSearchChipsRules()),
         textMatch: hasTextFallbackSignal(pageText, settings.popularSearchTextList)
       },
       {
         id: FEATURE.SMART_DELIVERY_BADGE,
-        enabled: Boolean(settings.hideSmartDeliveryBadge),
+        enabled: extensionEnabled && Boolean(settings.hideSmartDeliveryBadge),
         selectorMatches: countUniqueMatchesByRules(scope, smartDeliveryBadgeRules()),
         textMatch: null
       },
       {
         id: FEATURE.EMAIL_SUBSCRIPTION_BANNER,
-        enabled: Boolean(settings.hideEmailSubscriptionBanner),
+        enabled: extensionEnabled && Boolean(settings.hideEmailSubscriptionBanner),
         selectorMatches: countUniqueMatchesByRules(scope, emailSubscriptionBannerRules()),
         textMatch: null
       },
       {
+        id: FEATURE.SUPER_OFFER,
+        enabled: extensionEnabled && Boolean(settings.hideSuperOffer),
+        selectorMatches: countUniqueMatchesByRules(scope, superOfferRules()),
+        textMatch: null
+      },
+      {
+        id: FEATURE.PRODUCT_SERVICES,
+        enabled: extensionEnabled && Boolean(settings.hideProductServices),
+        selectorMatches: countUniqueMatchesByRules(scope, productServicesRules()),
+        textMatch: null
+      },
+      {
         id: FEATURE.CUSTOM,
-        enabled: customSelectors.length > 0,
+        enabled: extensionEnabled && customSelectors.length > 0,
         selectorMatches: countUniqueMatchesBySelectors(scope, customSelectors),
         textMatch: null
       }
@@ -502,9 +572,19 @@
     hideRuleSelectors(root, promoRules(), FEATURE.PROMO_MAIN);
   }
 
+  function hidePromoLabels(root, settings) {
+    if (!settings.hidePromoLabels) return;
+    hideRuleSelectors(root, promoLabelRules(), FEATURE.PROMO_LABELS);
+  }
+
   function hideRedBonusBlocks(root, settings) {
     if (!settings.hideRedBonusBlocks) return;
     hideRuleSelectors(root, redBonusRules(), FEATURE.RED_BONUS);
+  }
+
+  function hideBonusPoints(root, settings) {
+    if (!settings.hideBonusPoints) return;
+    hideRuleSelectors(root, bonusPointsRules(), FEATURE.BONUS_POINTS);
   }
 
   function hideAdvertisingSections(root, settings) {
@@ -668,14 +748,26 @@
     hideRuleSelectors(root, emailSubscriptionBannerRules(), FEATURE.EMAIL_SUBSCRIPTION_BANNER);
   }
 
+  function hideSuperOffer(root, settings) {
+    if (!settings.hideSuperOffer) return;
+    hideRuleSelectors(root, superOfferRules(), FEATURE.SUPER_OFFER);
+  }
+
+  function hideProductServices(root, settings) {
+    if (!settings.hideProductServices) return;
+    hideRuleSelectors(root, productServicesRules(), FEATURE.PRODUCT_SERVICES);
+  }
+
   function runCleanup(root, settings) {
-    if (settings.enabled === false) {
+    if (!isExtensionEnabled(settings)) {
       scheduleDiagnostics(settings);
       return;
     }
 
     hidePromoPrices(root, settings);
+    hidePromoLabels(root, settings);
     hideRedBonusBlocks(root, settings);
+    hideBonusPoints(root, settings);
     hideAdvertisingSections(root, settings);
     hideQuickFilters(root, settings);
     hideRozetkaAIWidget(root, settings);
@@ -683,6 +775,8 @@
     hidePopularSearchChips(root, settings);
     hideSmartDeliveryBadge(root, settings);
     hideEmailSubscriptionBanner(root, settings);
+    hideSuperOffer(root, settings);
+    hideProductServices(root, settings);
     hideCustomSelectors(root, settings);
     scheduleDiagnostics(settings);
   }
@@ -865,6 +959,7 @@
   function normalizeSettings(raw) {
     const merged = { ...DEFAULTS, ...(raw || {}) };
     merged.enabled = merged.enabled !== false;
+    merged.pauseUntil = Number.isFinite(Number(merged.pauseUntil)) ? Number(merged.pauseUntil) : 0;
     merged.customHideSelectors = typeof merged.customHideSelectors === "string" ? merged.customHideSelectors : "";
     merged.aiButtonTexts = typeof merged.aiButtonTexts === "string" ? merged.aiButtonTexts : "";
     merged.aiConsultationTexts = typeof merged.aiConsultationTexts === "string" ? merged.aiConsultationTexts : "";
@@ -896,7 +991,7 @@
 
   function applyLayoutMode(settings) {
     const root = document.documentElement;
-    if (settings.enabled === false) {
+    if (!isExtensionEnabled(settings)) {
       root.classList.remove(ROOT_CLASS_NORMALIZE);
       return;
     }
@@ -908,17 +1003,25 @@
   }
 
   function reconcileSettings(prevSettings, nextSettings) {
-    if (prevSettings.enabled && !nextSettings.enabled) {
+    const prevEnabled = isExtensionEnabled(prevSettings);
+    const nextEnabled = isExtensionEnabled(nextSettings);
+    if (prevEnabled && !nextEnabled) {
       removeAllManagedFeatures(document);
       return;
     }
-    if (!nextSettings.enabled) return;
+    if (!nextEnabled) return;
 
     if (prevSettings.hidePromoBlocks && !nextSettings.hidePromoBlocks) {
       removeFeatureFromAll(document, FEATURE.PROMO_MAIN);
     }
+    if (prevSettings.hidePromoLabels && !nextSettings.hidePromoLabels) {
+      removeFeatureFromAll(document, FEATURE.PROMO_LABELS);
+    }
     if (prevSettings.hideRedBonusBlocks && !nextSettings.hideRedBonusBlocks) {
       removeFeatureFromAll(document, FEATURE.RED_BONUS);
+    }
+    if (prevSettings.hideBonusPoints && !nextSettings.hideBonusPoints) {
+      removeFeatureFromAll(document, FEATURE.BONUS_POINTS);
     }
     if (prevSettings.hideAdvertisingSections && !nextSettings.hideAdvertisingSections) {
       removeFeatureFromAll(document, FEATURE.ADVERTISING);
@@ -940,6 +1043,12 @@
     }
     if (prevSettings.hideEmailSubscriptionBanner && !nextSettings.hideEmailSubscriptionBanner) {
       removeFeatureFromAll(document, FEATURE.EMAIL_SUBSCRIPTION_BANNER);
+    }
+    if (prevSettings.hideSuperOffer && !nextSettings.hideSuperOffer) {
+      removeFeatureFromAll(document, FEATURE.SUPER_OFFER);
+    }
+    if (prevSettings.hideProductServices && !nextSettings.hideProductServices) {
+      removeFeatureFromAll(document, FEATURE.PRODUCT_SERVICES);
     }
     if (prevSettings.customHideSelectors !== nextSettings.customHideSelectors) {
       removeFeatureFromAll(document, FEATURE.CUSTOM);
