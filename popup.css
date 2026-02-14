@@ -84,6 +84,10 @@ body {
   cursor: pointer;
 }
 
+.row[hidden] {
+  display: none !important;
+}
+
 .row + .row {
   border-top: 1px solid #f0f1f4;
 }

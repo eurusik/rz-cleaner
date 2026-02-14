@@ -49,6 +49,8 @@
     "product-services": "Блок “Додаткові послуги”",
     "sticky-product-carriage": "Нижня плаваюча панель кошика",
     "promotion-product": "Акційний блок під товаром",
+    "tile-gallery": "Галерея на картках",
+    "normalize-price-layout": "Компактні ціни в картках",
     custom: "Додаткові CSS-селектори"
   };
   const FEATURE_SETTING_KEYS = {
@@ -68,6 +70,8 @@
     "product-services": "hideProductServices",
     "sticky-product-carriage": "hideStickyProductCarriage",
     "promotion-product": "hidePromotionProduct",
+    "tile-gallery": "enableTileGallery",
+    "normalize-price-layout": "normalizePriceLayout",
     custom: "customHideSelectors"
   };
   let statusTimer = 0;

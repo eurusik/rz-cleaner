@@ -12,6 +12,7 @@ const ads = fs.readFileSync(path.join(ROOT, 'features/ads.js'), 'utf8');
 const ai = fs.readFileSync(path.join(ROOT, 'features/ai.js'), 'utf8');
 const smart = fs.readFileSync(path.join(ROOT, 'features/smart.js'), 'utf8');
 const rich = fs.readFileSync(path.join(ROOT, 'features/rich-content-spoiler.js'), 'utf8');
+const tileGallery = fs.readFileSync(path.join(ROOT, 'features/tile-gallery.js'), 'utf8');
 const styles = fs.readFileSync(path.join(ROOT, 'styles.css'), 'utf8');
 
 function mustContain(text, snippet, label) {
@@ -28,6 +29,12 @@ test('content core defines feature ids for new blocks', () => {
   mustContain(core, 'SUPER_OFFER: "super-offer"', 'content-core.js');
   mustContain(core, 'PRODUCT_SERVICES: "product-services"', 'content-core.js');
   mustContain(core, 'STICKY_PRODUCT_CARRIAGE: "sticky-product-carriage"', 'content-core.js');
+});
+
+test('content core exposes popup snapshot runtime message and normalize diagnostics', () => {
+  mustContain(core, 'const POPUP_FEATURES_REQUEST_TYPE = "RZC_GET_POPUP_FEATURES";', 'content-core.js');
+  mustContain(core, 'id: "normalize-price-layout"', 'content-core.js');
+  mustContain(core, 'message.type === POPUP_FEATURES_REQUEST_TYPE', 'content-core.js');
 });
 
 test('content core uses feature registry for cleanup and reconcile', () => {
@@ -56,6 +63,9 @@ test('feature modules include promo, ads, ai and rich spoiler hooks', () => {
   mustContain(rich, 'Показати повний опис', 'features/rich-content-spoiler.js');
   mustContain(rich, 'Сховати повний опис', 'features/rich-content-spoiler.js');
   mustContain(rich, 'onDisabled', 'features/rich-content-spoiler.js');
+  mustContain(tileGallery, 'rzc-tile-gallery-arrow', 'features/tile-gallery.js');
+  mustContain(tileGallery, 'applyTileGalleries', 'features/tile-gallery.js');
+  mustContain(tileGallery, 'onDisabled', 'features/tile-gallery.js');
 });
 
 test('styles keep native rich-content button hidden when custom spoiler is active', () => {

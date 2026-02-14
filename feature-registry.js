@@ -3,7 +3,7 @@
 
   function getModules() {
     const features = globalThis.RZCFeatures || {};
-    return [features.promo, features.ads, features.ai, features.smart, features.richContentSpoiler].filter(Boolean);
+    return [features.promo, features.ads, features.ai, features.smart, features.richContentSpoiler, features.tileGallery].filter(Boolean);
   }
 
   function runFeatureCleanup(ctx, root, settings) {

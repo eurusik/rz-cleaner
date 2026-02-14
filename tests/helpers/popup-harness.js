@@ -40,6 +40,7 @@ class FakeElement {
     this.id = id;
     this.checked = false;
     this.disabled = false;
+    this.hidden = false;
     this.value = '';
     this.textContent = '';
     this.classList = new FakeClassList();
@@ -58,10 +59,30 @@ class FakeElement {
   }
 }
 
-function createHarness({ syncSettings = {} } = {}) {
+function createHarness({ syncSettings = {}, activeTabUrl = '', diagnostics = null, tabContext = null } = {}) {
   const byId = new Map();
   const syncSetCalls = [];
   let timerId = 0;
+  const TOGGLE_IDS = [
+    'hideAdvertisingSections',
+    'hidePromoBlocks',
+    'hidePromoLabels',
+    'hideProductPictograms',
+    'hideRedBonusBlocks',
+    'hideBonusPoints',
+    'hideQuickFilters',
+    'hideRozetkaAI',
+    'hideAiConsultationBlock',
+    'hidePopularSearchChips',
+    'hideSmartDeliveryBadge',
+    'hideEmailSubscriptionBanner',
+    'hideSuperOffer',
+    'hideProductServices',
+    'hideStickyProductCarriage',
+    'hidePromotionProduct',
+    'enableTileGallery',
+    'normalizePriceLayout'
+  ];
 
   function ensure(id, tag = 'div') {
     if (!byId.has(id)) byId.set(id, new FakeElement(tag, id));
@@ -73,10 +94,8 @@ function createHarness({ syncSettings = {} } = {}) {
   ensure('extensionEnabled', 'input');
   ensure('disableOneHour', 'button');
   ensure('openOptions', 'button');
-  ensure('hideAdvertisingSections', 'input');
-  ensure('hidePromoBlocks', 'input');
-  ensure('hideSmartDeliveryBadge', 'input');
-  ensure('normalizePriceLayout', 'input');
+  TOGGLE_IDS.forEach((id) => ensure(id, 'input'));
+  TOGGLE_IDS.forEach((id) => ensure(`row-${id}`, 'label'));
 
   const toggles = new FakeElement('section');
   toggles.className = 'toggles';
@@ -89,6 +108,12 @@ function createHarness({ syncSettings = {} } = {}) {
     querySelector(selector) {
       if (selector === '.toggles') return toggles;
       return null;
+    },
+    querySelectorAll(selector) {
+      if (selector === '.toggles input[id]') {
+        return TOGGLE_IDS.map((id) => byId.get(id)).filter(Boolean);
+      }
+      return [];
     }
   };
 
@@ -102,12 +127,25 @@ function createHarness({ syncSettings = {} } = {}) {
           syncSetCalls.push(payload);
           if (typeof cb === 'function') cb();
         }
+      },
+      local: {
+        get(request, cb) {
+          cb({ ...request, rzc_settings_diagnostics: diagnostics });
+        }
       }
     },
     runtime: {
       lastError: null,
       openOptionsPage() {
         openOptionsCalls += 1;
+      }
+    },
+    tabs: {
+      query(_queryInfo, cb) {
+        cb(activeTabUrl ? [{ id: 1, active: true, url: activeTabUrl }] : []);
+      },
+      sendMessage(_tabId, _message, cb) {
+        cb(tabContext);
       }
     }
   };
@@ -128,8 +166,9 @@ function createHarness({ syncSettings = {} } = {}) {
 
   async function runPopup() {
     vm.runInContext(POPUP_SOURCE, sandbox);
-    await Promise.resolve();
-    await Promise.resolve();
+    for (let i = 0; i < 30; i += 1) {
+      await Promise.resolve();
+    }
   }
 
   return {

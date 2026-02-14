@@ -5,7 +5,7 @@
   "main": "config.js",
   "scripts": {
     "test": "node --test tests/*.test.js",
-    "test:syntax": "node --check config.js && node --check dom-utils.js && node --check diagnostics.js && node --check feature-registry.js && node --check features/promo.js && node --check features/ads.js && node --check features/ai.js && node --check features/smart.js && node --check features/rich-content-spoiler.js && node --check content-core.js && node --check content.js && node --check options.js && node --check popup.js"
+    "test:syntax": "node --check config.js && node --check dom-utils.js && node --check tile-gallery-bridge-protocol.js && node --check diagnostics.js && node --check feature-registry.js && node --check features/promo.js && node --check features/ads.js && node --check features/ai.js && node --check features/smart.js && node --check features/rich-content-spoiler.js && node --check features/tile-gallery.js && node --check page-bridge.js && node --check content-core.js && node --check content.js && node --check options.js && node --check popup.js"
   },
   "keywords": [],
   "author": "",

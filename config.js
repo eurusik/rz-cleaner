@@ -22,6 +22,7 @@
       hideProductServices: true,
       hideStickyProductCarriage: true,
       hidePromotionProduct: true,
+      enableTileGallery: true,
       normalizePriceLayout: true,
       aiButtonTexts: "rozetka ai",
       aiConsultationTexts: "потрібна консультація\nai-помічник",

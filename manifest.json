@@ -6,7 +6,8 @@
   "description": "Hide Rozetka promo blocks and normalize product card prices.",
   "minimum_chrome_version": "114",
   "permissions": [
-    "storage"
+    "storage",
+    "tabs"
   ],
   "action": {
     "default_title": "Rozetka Cleaner",
@@ -25,13 +26,26 @@
         "*://*.rozetka.com.ua/*"
       ],
       "js": [
+        "tile-gallery-bridge-protocol.js",
+        "page-bridge.js"
+      ],
+      "run_at": "document_start",
+      "world": "MAIN"
+    },
+    {
+      "matches": [
+        "*://*.rozetka.com.ua/*"
+      ],
+      "js": [
         "config.js",
         "dom-utils.js",
+        "tile-gallery-bridge-protocol.js",
         "features/promo.js",
         "features/ads.js",
         "features/ai.js",
         "features/smart.js",
         "features/rich-content-spoiler.js",
+        "features/tile-gallery.js",
         "diagnostics.js",
         "feature-registry.js",
         "content-core.js",

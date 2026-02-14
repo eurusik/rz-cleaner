@@ -63,3 +63,111 @@ rz-store-rich-content .rzc-rich-toggle {
   line-height: 1.2;
   padding: 8px 12px;
 }
+
+/* Product tile mini-gallery arrows */
+.rzc-tile-gallery-host {
+  position: relative;
+}
+
+.rzc-tile-gallery-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 30px;
+  height: 30px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 999px;
+  background: rgba(236, 236, 236, 0.92);
+  color: transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 6;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+  transition: background-color 120ms ease, box-shadow 120ms ease, transform 120ms ease;
+}
+
+.rzc-tile-gallery-arrow-prev {
+  left: 8px;
+}
+
+.rzc-tile-gallery-arrow-next {
+  right: 8px;
+}
+
+.rzc-tile-gallery-arrow::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  border-top: 2px solid #7a7a7a;
+  border-right: 2px solid #7a7a7a;
+}
+
+.rzc-tile-gallery-arrow-prev::before {
+  transform: rotate(-135deg);
+  margin-left: 4px;
+}
+
+.rzc-tile-gallery-arrow-next::before {
+  transform: rotate(45deg);
+  margin-right: 4px;
+}
+
+.rzc-tile-gallery-arrow:hover {
+  background: rgba(228, 228, 228, 0.96);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
+}
+
+.rzc-tile-gallery-arrow:active {
+  transform: translateY(-50%) scale(0.97);
+}
+
+.rzc-tile-gallery-counter {
+  position: absolute;
+  left: 50%;
+  bottom: 8px;
+  transform: translateX(-50%);
+  z-index: 7;
+  font-size: 11px;
+  line-height: 1;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.56);
+  border-radius: 999px;
+  padding: 4px 7px;
+  pointer-events: none;
+}
+
+.rzc-tile-gallery-host.rzc-tile-gallery-loading .rzc-tile-gallery-arrow {
+  background: rgba(232, 232, 232, 0.96);
+}
+
+.rzc-tile-gallery-host.rzc-tile-gallery-loading img.tile-image {
+  opacity: 0.62;
+  filter: saturate(0.92);
+  transition: opacity 120ms ease;
+}
+
+.rzc-tile-gallery-host.rzc-tile-gallery-loading .rzc-tile-gallery-arrow::after {
+  content: "";
+  width: 12px;
+  height: 12px;
+  border: 2px solid rgba(122, 122, 122, 0.28);
+  border-top-color: #7a7a7a;
+  border-radius: 50%;
+  position: absolute;
+  animation: rzc-tile-gallery-spin 0.7s linear infinite;
+}
+
+.rzc-tile-gallery-host.rzc-tile-gallery-loading .rzc-tile-gallery-arrow-prev::before,
+.rzc-tile-gallery-host.rzc-tile-gallery-loading .rzc-tile-gallery-arrow-next::before {
+  content: "";
+}
+
+@keyframes rzc-tile-gallery-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

@@ -38,6 +38,8 @@
   const CLEANUP_TIMEOUT_MS = 200;
   const MAX_PENDING_ROOTS = 200;
   const SETTINGS_SYNC_DEBOUNCE_MS = 120;
+  const PAGE_CONTEXT_REQUEST_TYPE = "RZC_GET_PAGE_CONTEXT";
+  const POPUP_FEATURES_REQUEST_TYPE = "RZC_GET_POPUP_FEATURES";
 
   const CONFIG = globalThis.RZC_CONFIG || {};
   const STORAGE_KEY = CONFIG.storageKey || "rzc_settings";
@@ -162,6 +164,7 @@
   let diagnosticsTimer = 0;
   const pendingRoots = new Set();
   let onStorageChanged = null;
+  let onRuntimeMessage = null;
   const internalStyleWriteCounts = new WeakMap();
 
   function parseFeatureSet(el) {
@@ -419,6 +422,15 @@
     return true;
   }
 
+  function detectPageTypeFromUrl(url) {
+    const raw = String(url || "").trim();
+    if (!raw) return "unknown";
+    if (!/^https?:\/\/(?:[\w-]+\.)*rozetka\.com\.ua\//i.test(raw)) return "other";
+    if (/\/p\d+(?:\/|$)/i.test(raw)) return "product";
+    if (/\/c\d+(?:\/|$)/i.test(raw)) return "catalog";
+    return "other";
+  }
+
   function getDiagnosticsFeatureEntries(settings, scope) {
     const customSelectors = settings.customHideSelectorList || [];
     const pageText = (scope.textContent || "").toLowerCase();
@@ -436,6 +448,17 @@
         enabled: extensionEnabled && customSelectors.length > 0,
         selectorMatches: countUniqueMatchesBySelectors(scope, customSelectors),
         textMatch: null
+      },
+      {
+        id: "normalize-price-layout",
+        enabled: extensionEnabled && Boolean(settings.normalizePriceLayout),
+        selectorMatches: countUniqueMatchesBySelectors(scope, [
+          "rz-product-tile",
+          "rz-product-tile rz-tile-price",
+          "rz-product-tile rz-red-price"
+        ]),
+        textMatch: null,
+        statusMode: "presence"
       }
     ].map((entry) => {
       const hiddenCount = countHiddenByFeature(scope, entry.id);
@@ -445,14 +468,18 @@
       let status = entry.id === FEATURE.CUSTOM ? "not_configured" : "disabled";
 
       if (entry.enabled) {
-        if (hasSelectorOrTextSignal && hiddenCount === 0) {
-          // Something matching was found but nothing got hidden.
-          status = "warning";
-        } else if (!hasSelectorOrTextSignal && hiddenCount === 0) {
-          // This page likely just doesn't contain this block type.
-          status = "not_on_page";
+        if (entry.statusMode === "presence") {
+          status = hasSelectorOrTextSignal ? "ok" : "not_on_page";
         } else {
-          status = "ok";
+          if (hasSelectorOrTextSignal && hiddenCount === 0) {
+            // Something matching was found but nothing got hidden.
+            status = "warning";
+          } else if (!hasSelectorOrTextSignal && hiddenCount === 0) {
+            // This page likely just doesn't contain this block type.
+            status = "not_on_page";
+          } else {
+            status = "ok";
+          }
         }
       }
 
@@ -652,6 +679,10 @@
       chrome.storage.onChanged.removeListener(onStorageChanged);
       onStorageChanged = null;
     }
+    if (onRuntimeMessage && chrome.runtime && chrome.runtime.onMessage) {
+      chrome.runtime.onMessage.removeListener(onRuntimeMessage);
+      onRuntimeMessage = null;
+    }
   }
 
   function readSettings() {
@@ -785,12 +816,38 @@
     chrome.storage.onChanged.addListener(onStorageChanged);
   }
 
+  function watchRuntimeMessages() {
+    if (!chrome.runtime || !chrome.runtime.onMessage || typeof chrome.runtime.onMessage.addListener !== "function") {
+      return;
+    }
+    onRuntimeMessage = (message, _sender, sendResponse) => {
+      if (!message || typeof message.type !== "string") return;
+      if (message.type === PAGE_CONTEXT_REQUEST_TYPE) {
+        sendResponse({
+          url: location.href,
+          pageType: detectPageTypeFromUrl(location.href)
+        });
+        return;
+      }
+      if (message.type === POPUP_FEATURES_REQUEST_TYPE) {
+        sendResponse({
+          updatedAt: Date.now(),
+          url: location.href,
+          pageType: detectPageTypeFromUrl(location.href),
+          features: getDiagnosticsFeatureEntries(currentSettings, document)
+        });
+      }
+    };
+    chrome.runtime.onMessage.addListener(onRuntimeMessage);
+  }
+
     readSettings().then((settings) => {
       currentSettings = settings;
       applyLayoutMode(currentSettings);
       runCleanup(document, currentSettings);
       initObserver();
       watchSettingsChanges();
+      watchRuntimeMessages();
       window.addEventListener("pagehide", stopObserver, { once: true });
     });
   }
