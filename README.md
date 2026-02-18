@@ -31,6 +31,16 @@ RZ Cleaner (Unofficial) — це просте розширення для Chrome
 
 ## Як встановити
 
+Можна встановити розширення з [Chrome Web Store](https://chromewebstore.google.com/detail/gndiadgfloimaeapkjbbbhbmdkcgnobb?utm_source=item-share-cb) та користуватись покращеною версією Rozetka.
+
+### Варіант 1: Chrome Web Store
+
+1. Відкрийте сторінку розширення: [RZ Cleaner у Chrome Web Store](https://chromewebstore.google.com/detail/gndiadgfloimaeapkjbbbhbmdkcgnobb?utm_source=item-share-cb).
+2. Натисніть `Додати в Chrome`.
+3. Підтвердіть встановлення та відкрийте Rozetka.
+
+### Варіант 2: вручну (з репозиторію)
+
 1. Завантажте цей репозиторій (`Code` -> `Download ZIP`) і розпакуйте архів.
 2. Відкрийте в Chrome сторінку `chrome://extensions`.
 3. Увімкніть `Developer mode` (перемикач справа вгорі).
