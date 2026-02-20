@@ -24,6 +24,12 @@ function wireSmartAndEmailSelectors(harness, targets) {
   document.setQueryResult('rz-marketing-subscription-banner', [targets.emailBanner]);
   document.setQueryResult('rz-marketing-subscription-banner .content', [targets.emailBannerContent]);
   document.setQueryResult('rz-marketing-subscription-banner rz-modal-close-btn', [targets.emailBannerClose]);
+  document.setQueryResult('.exponea-banner__block', [targets.exponeaMiniBanner]);
+  document.setQueryResult('.exponea-banner__sales', [targets.exponeaMiniBannerLink]);
+  document.setQueryResult('rz-red-card-link', [targets.redCardLink]);
+  document.setQueryResult("rz-red-card-link a[href*='/rozetka-card/']", [targets.redCardAnchor]);
+  document.setQueryResult('rz-smart-subscribe-link', [targets.smartSubscribeLink]);
+  document.setQueryResult("rz-smart-subscribe-link a[href*='/smart/']", [targets.smartSubscribeAnchor]);
   document.setQueryResult('rz-super-offer', [targets.superOffer]);
   document.setQueryResult("rz-super-offer [data-testid='super-offer']", [targets.superOfferInner]);
   document.setQueryResult('rz-super-offer .super-offer', [targets.superOfferContent]);
@@ -57,6 +63,21 @@ function makeTargets(harness) {
   const emailBannerClose = harness.createElement('rz-modal-close-btn');
   emailBanner.appendChild(emailBannerContent);
   emailBanner.appendChild(emailBannerClose);
+
+  const exponeaMiniBanner = harness.createElement('div', { classes: ['exponea-banner__block'] });
+  exponeaMiniBanner.setAttribute('id', 'exponea-banner__block');
+  const exponeaMiniBannerLink = harness.createElement('a', { classes: ['exponea-banner__sales'] });
+  exponeaMiniBanner.appendChild(exponeaMiniBannerLink);
+
+  const redCardLink = harness.createElement('rz-red-card-link');
+  const redCardAnchor = harness.createElement('a');
+  redCardAnchor.setAttribute('href', 'https://rozetka.com.ua/ua/rozetka-card/');
+  redCardLink.appendChild(redCardAnchor);
+
+  const smartSubscribeLink = harness.createElement('rz-smart-subscribe-link');
+  const smartSubscribeAnchor = harness.createElement('a');
+  smartSubscribeAnchor.setAttribute('href', 'https://rozetka.com.ua/ua/smart/');
+  smartSubscribeLink.appendChild(smartSubscribeAnchor);
 
   const superOffer = harness.createElement('rz-super-offer');
   const superOfferInner = harness.createElement('div');
@@ -96,6 +117,12 @@ function makeTargets(harness) {
     emailBanner,
     emailBannerContent,
     emailBannerClose,
+    exponeaMiniBanner,
+    exponeaMiniBannerLink,
+    redCardLink,
+    redCardAnchor,
+    smartSubscribeLink,
+    smartSubscribeAnchor,
     superOffer,
     superOfferInner,
     superOfferContent,
@@ -123,11 +150,44 @@ test('content hides smart delivery and email banner blocks on initial cleanup', 
   assert.equal(isHidden(targets.deliveryPrice), true);
   assert.equal(isHidden(targets.deliveryPremium), true);
   assert.equal(isHidden(targets.emailBanner), true);
+  assert.equal(isHidden(targets.exponeaMiniBanner), true);
   assert.equal(isHidden(targets.superOffer), true);
   assert.equal(isHidden(targets.productServices), true);
   assert.equal(isHidden(targets.stickyCarriage), true);
   assert.equal(isHidden(targets.promotionProduct), true);
   assert.equal(isHidden(targets.productPictograms), true);
+});
+
+test('content reveals exponea smart mini banner when smart toggle is disabled', async () => {
+  const harness = createHarness();
+  const targets = makeTargets(harness);
+  wireSmartAndEmailSelectors(harness, targets);
+
+  await harness.runContent();
+  assert.equal(isHidden(targets.exponeaMiniBanner), true);
+
+  await harness.emitSettingsChange({ hideSmartDeliveryBadge: false });
+
+  assert.equal(targets.exponeaMiniBanner.getAttribute(HIDDEN_ATTR), null);
+  assert.equal(targets.exponeaMiniBanner.classList.contains(HIDDEN_CLASS), false);
+});
+
+test('content hides sidebar rozetka-card and smart subscribe links with smart toggle', async () => {
+  const harness = createHarness();
+  const targets = makeTargets(harness);
+  wireSmartAndEmailSelectors(harness, targets);
+
+  await harness.runContent();
+
+  assert.equal(isHidden(targets.redCardLink), true);
+  assert.equal(isHidden(targets.smartSubscribeLink), true);
+
+  await harness.emitSettingsChange({ hideSmartDeliveryBadge: false });
+
+  assert.equal(targets.redCardLink.getAttribute(HIDDEN_ATTR), null);
+  assert.equal(targets.redCardLink.classList.contains(HIDDEN_CLASS), false);
+  assert.equal(targets.smartSubscribeLink.getAttribute(HIDDEN_ATTR), null);
+  assert.equal(targets.smartSubscribeLink.classList.contains(HIDDEN_CLASS), false);
 });
 
 test('content does not hide smart/email when toggles are disabled from settings', async () => {
@@ -367,6 +427,58 @@ test('observer childList mutation triggers cleanup for dynamically added deliver
   ]);
 
   assert.equal(isHidden(deliveryPrice), true);
+});
+
+test('observer childList mutation hides dynamically added exponea smart mini banner', async () => {
+  const harness = createHarness();
+  await harness.runContent();
+
+  const observer = harness.getLastObserver();
+  assert.ok(observer, 'observer was not created');
+
+  const miniBanner = harness.createElement('div', { classes: ['exponea-banner__block'] });
+  const miniBannerLink = harness.createElement('a', { classes: ['exponea-banner__sales'] });
+  miniBanner.appendChild(miniBannerLink);
+  miniBanner.setQueryResult('.exponea-banner__sales', [miniBannerLink]);
+
+  observer.trigger([
+    {
+      type: 'childList',
+      addedNodes: [miniBanner]
+    }
+  ]);
+
+  assert.equal(isHidden(miniBanner), true);
+});
+
+test('observer childList mutation hides dynamically added sidebar smart links', async () => {
+  const harness = createHarness();
+  await harness.runContent();
+
+  const observer = harness.getLastObserver();
+  assert.ok(observer, 'observer was not created');
+
+  const redCardLink = harness.createElement('rz-red-card-link');
+  const redCardAnchor = harness.createElement('a');
+  redCardAnchor.setAttribute('href', 'https://rozetka.com.ua/ua/rozetka-card/');
+  redCardLink.appendChild(redCardAnchor);
+  redCardLink.setQueryResult("rz-red-card-link a[href*='/rozetka-card/']", [redCardAnchor]);
+
+  const smartSubscribeLink = harness.createElement('rz-smart-subscribe-link');
+  const smartSubscribeAnchor = harness.createElement('a');
+  smartSubscribeAnchor.setAttribute('href', 'https://rozetka.com.ua/ua/smart/');
+  smartSubscribeLink.appendChild(smartSubscribeAnchor);
+  smartSubscribeLink.setQueryResult("rz-smart-subscribe-link a[href*='/smart/']", [smartSubscribeAnchor]);
+
+  observer.trigger([
+    {
+      type: 'childList',
+      addedNodes: [redCardLink, smartSubscribeLink]
+    }
+  ]);
+
+  assert.equal(isHidden(redCardLink), true);
+  assert.equal(isHidden(smartSubscribeLink), true);
 });
 
 test('style mutation marks hidden node as dirty and reveal clears inline hide styles', async () => {

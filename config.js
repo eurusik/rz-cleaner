@@ -126,6 +126,29 @@
         {
           query: "rz-delivery-price svg use[href*='#icon-premium-smart']",
           closest: "rz-delivery-price"
+        },
+        {
+          query: ".exponea-banner__block"
+        },
+        {
+          query: ".exponea-banner__sales",
+          closest: ".exponea-banner__block"
+        },
+        {
+          query: "rz-red-card-link",
+          closest: "rz-red-card-link"
+        },
+        {
+          query: "rz-red-card-link a[href*='/rozetka-card/']",
+          closest: "rz-red-card-link"
+        },
+        {
+          query: "rz-smart-subscribe-link",
+          closest: "rz-smart-subscribe-link"
+        },
+        {
+          query: "rz-smart-subscribe-link a[href*='/smart/']",
+          closest: "rz-smart-subscribe-link"
         }
       ],
       emailSubscriptionBanner: [

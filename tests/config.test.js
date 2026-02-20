@@ -55,6 +55,12 @@ test('config smart selectors cover tile, premium, and delivery price blocks', ()
   assert.ok(queries.includes("rz-product-tile use[href*='#icon-premium-smart']"));
   assert.ok(queries.includes('rz-delivery-premium'));
   assert.ok(queries.includes("rz-delivery-price use[href*='#icon-premium-smart']"));
+  assert.ok(queries.includes('.exponea-banner__block'));
+  assert.ok(queries.includes('.exponea-banner__sales'));
+  assert.ok(queries.includes('rz-red-card-link'));
+  assert.ok(queries.includes("rz-red-card-link a[href*='/rozetka-card/']"));
+  assert.ok(queries.includes('rz-smart-subscribe-link'));
+  assert.ok(queries.includes("rz-smart-subscribe-link a[href*='/smart/']"));
 });
 
 test('config has selector for marketing email banner', () => {

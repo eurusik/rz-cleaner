@@ -68,6 +68,8 @@
     "rz-delivery-premium",
     "rz-delivery-price",
     "rz-marketing-subscription-banner",
+    "rz-red-card-link",
+    "rz-smart-subscribe-link",
     "rz-super-offer",
     "rz-product-services",
     "rz-product-carriage",
@@ -93,6 +95,7 @@
     ".carriage__main",
     ".product-promotion",
     ".rich-content",
+    ".exponea-banner__block",
     ".tags-list"
   ].join(", ");
   const HINT_TAGS = new Set([
@@ -112,6 +115,8 @@
     "RZ-DELIVERY-PREMIUM",
     "RZ-DELIVERY-PRICE",
     "RZ-MARKETING-SUBSCRIPTION-BANNER",
+    "RZ-RED-CARD-LINK",
+    "RZ-SMART-SUBSCRIBE-LINK",
     "RZ-SUPER-OFFER",
     "RZ-PRODUCT-SERVICES",
     "RZ-PRODUCT-CARRIAGE",
@@ -136,6 +141,7 @@
     "carriage__main",
     "product-promotion",
     "rich-content",
+    "exponea-banner__block",
     "tags-list",
     "max-three-rows"
   ];

@@ -92,6 +92,9 @@ test('content observer hints include smart/delivery/email and rich tags', () => 
   mustContain(core, '"rz-delivery-premium"', 'content-core.js');
   mustContain(core, '"rz-delivery-price"', 'content-core.js');
   mustContain(core, '"rz-marketing-subscription-banner"', 'content-core.js');
+  mustContain(core, '"rz-red-card-link"', 'content-core.js');
+  mustContain(core, '"rz-smart-subscribe-link"', 'content-core.js');
+  mustContain(core, '".exponea-banner__block"', 'content-core.js');
   mustContain(core, '"rz-product-pictograms"', 'content-core.js');
   mustContain(core, '"rz-promotion-product"', 'content-core.js');
   mustContain(core, '"rz-super-offer"', 'content-core.js');
@@ -101,6 +104,8 @@ test('content observer hints include smart/delivery/email and rich tags', () => 
   mustContain(core, '"rz-rich-content"', 'content-core.js');
   mustContain(core, '"RZ-STORE-RICH-CONTENT"', 'content-core.js');
   mustContain(core, '"RZ-RICH-CONTENT"', 'content-core.js');
+  mustContain(core, '"RZ-RED-CARD-LINK"', 'content-core.js');
+  mustContain(core, '"RZ-SMART-SUBSCRIBE-LINK"', 'content-core.js');
   mustContain(core, '"RZ-PRODUCT-CARRIAGE"', 'content-core.js');
   mustContain(core, '"RZ-PRODUCT-PICTOGRAMS"', 'content-core.js');
   mustContain(core, '"RZ-PROMOTION-PRODUCT"', 'content-core.js');
