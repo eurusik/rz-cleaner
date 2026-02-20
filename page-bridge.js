@@ -7,6 +7,8 @@
   const REQUEST_SOURCE = bridgeProtocol.REQUEST_SOURCE || "RZC_TILE_GALLERY_CONTENT";
   const REQUEST_TYPE = bridgeProtocol.REQUEST_TYPE || "RZC_TILE_GALLERY_REQUEST_SNAPSHOT";
   const MAX_CACHE_SIZE = 3000;
+  const FETCH_PRODUCT_HINT_RE = /\/(?:api|search|catalog|category|product|goods|recommend|graphql)\b/i;
+  const QUICK_SCAN_NODE_LIMIT = 220;
   const CACHE = new Map();
   const IMAGE_RE = /\.(jpg|jpeg|png|webp|gif)(\?|$)/i;
 
@@ -46,6 +48,64 @@
         hover: urls[1] || ""
       }
     };
+  }
+
+  function looksLikeRozetkaHost(hostname) {
+    const host = String(hostname || "").toLowerCase();
+    return host === "rozetka.com.ua" || host.endsWith(".rozetka.com.ua");
+  }
+
+  function toRequestUrl(input) {
+    if (!input) return "";
+    if (typeof input === "string") return input;
+    if (typeof input.url === "string") return input.url;
+    return "";
+  }
+
+  function shouldInspectUrlForProducts(rawUrl) {
+    const value = String(rawUrl || "").trim();
+    if (!value) return true;
+    try {
+      const parsed = new URL(value, window.location && window.location.href ? window.location.href : undefined);
+      if (!looksLikeRozetkaHost(parsed.hostname)) return false;
+      const pathWithQuery = `${parsed.pathname || ""}${parsed.search || ""}`;
+      return FETCH_PRODUCT_HINT_RE.test(pathWithQuery.toLowerCase());
+    } catch (_error) {
+      return true;
+    }
+  }
+
+  function payloadLikelyContainsProducts(payload) {
+    if (!isObject(payload) && !Array.isArray(payload)) return false;
+    const stack = [payload];
+    const seen = new WeakSet();
+    let visited = 0;
+
+    while (stack.length && visited < QUICK_SCAN_NODE_LIMIT) {
+      const node = stack.pop();
+      if (!isObject(node) && !Array.isArray(node)) continue;
+      if (seen.has(node)) continue;
+      seen.add(node);
+      visited += 1;
+
+      if (Array.isArray(node)) {
+        for (let i = 0; i < node.length; i += 1) {
+          stack.push(node[i]);
+        }
+        continue;
+      }
+
+      if (isObject(node.images)) return true;
+
+      const keys = Object.keys(node);
+      for (let i = 0; i < keys.length; i += 1) {
+        const key = keys[i];
+        if (key === "images" || key === "products" || key === "goods") return true;
+        stack.push(node[key]);
+      }
+    }
+
+    return false;
   }
 
   function collectProducts(node, out, seen) {
@@ -108,6 +168,7 @@
   }
 
   function processPayload(payload) {
+    if (!payloadLikelyContainsProducts(payload)) return;
     const products = productsFromPayload(payload);
     if (!products.length) return;
     postProducts(products);
@@ -117,7 +178,9 @@
     isImageUrl,
     uniqueUrls,
     normalizeProduct,
-    productsFromPayload
+    productsFromPayload,
+    payloadLikelyContainsProducts,
+    shouldInspectUrlForProducts
   };
 
   if (typeof window.addEventListener === "function") {
@@ -135,6 +198,11 @@
     window.fetch = async function (...args) {
       const response = await originalFetch.apply(this, args);
       try {
+        const requestUrl = toRequestUrl(args[0]);
+        const responseUrl = response && typeof response.url === "string" ? response.url : "";
+        if (!shouldInspectUrlForProducts(requestUrl || responseUrl)) {
+          return response;
+        }
         const cloned = response && typeof response.clone === "function" ? response.clone() : null;
         const contentType =
           cloned && cloned.headers && typeof cloned.headers.get === "function"
@@ -156,6 +224,7 @@
     OriginalXHR.prototype.send = function (...args) {
       this.addEventListener("load", function () {
         try {
+          if (!shouldInspectUrlForProducts(this.responseURL || "")) return;
           if (this.responseType === "json" && isObject(this.response)) {
             processPayload(this.response);
             return;

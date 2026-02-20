@@ -20,7 +20,8 @@ function loadBridgeHarness() {
       fetch: undefined,
       XMLHttpRequest: undefined
     },
-    JSON
+    JSON,
+    URL
   };
   sandbox.globalThis = sandbox;
   vm.createContext(sandbox);
@@ -124,16 +125,59 @@ test('page-bridge skips fetch body json parsing for non-json responses', async (
       fetch: async () => originalFetchResponse,
       XMLHttpRequest: undefined
     },
-    JSON
+    JSON,
+    URL
   };
   sandbox.globalThis = sandbox;
   vm.createContext(sandbox);
   vm.runInContext(protocolSource, sandbox);
   vm.runInContext(bridgeSource, sandbox);
 
-  await sandbox.window.fetch('https://rozetka.com.ua/test');
+  await sandbox.window.fetch('https://rozetka.com.ua/api/v4/search/');
   await Promise.resolve();
 
   assert.equal(cloneCalls, 1);
+  assert.equal(jsonCalls, 0);
+});
+
+test('page-bridge skips json parsing for non-product endpoints', async () => {
+  let jsonCalls = 0;
+  const listeners = new Map();
+  const sandbox = {
+    console,
+    window: {
+      addEventListener(type, cb) {
+        listeners.set(type, cb);
+      },
+      postMessage() {},
+      fetch: async () => ({
+        url: 'https://rozetka.com.ua/ua/account/profile',
+        clone() {
+          return {
+            headers: {
+              get() {
+                return 'application/json';
+              }
+            },
+            json() {
+              jsonCalls += 1;
+              return Promise.resolve({ ok: true });
+            }
+          };
+        }
+      }),
+      XMLHttpRequest: undefined
+    },
+    JSON,
+    URL
+  };
+  sandbox.globalThis = sandbox;
+  vm.createContext(sandbox);
+  vm.runInContext(protocolSource, sandbox);
+  vm.runInContext(bridgeSource, sandbox);
+
+  await sandbox.window.fetch('https://rozetka.com.ua/ua/account/profile');
+  await Promise.resolve();
+
   assert.equal(jsonCalls, 0);
 });

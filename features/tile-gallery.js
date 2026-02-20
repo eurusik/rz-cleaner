@@ -15,10 +15,14 @@
   const AUTO_REMOTE_FETCH_BASE_DELAY_MS = 220;
   const MAX_PRODUCT_CACHE_SIZE = 3000;
   const MAX_REMOTE_CACHE_SIZE = 800;
+  const MAX_PRELOAD_CACHE_SIZE = 600;
+  const PRODUCT_ID_ATTR = "data-rzc-tile-gallery-product-id";
   const bridgeProtocol = globalThis.RZCTileGalleryBridgeProtocol || {};
   const CACHE = (globalThis.__RZC_TILE_GALLERY_CACHE__ = globalThis.__RZC_TILE_GALLERY_CACHE__ || new Map());
   const REMOTE_CACHE = (globalThis.__RZC_TILE_GALLERY_REMOTE_CACHE__ =
     globalThis.__RZC_TILE_GALLERY_REMOTE_CACHE__ || new Map());
+  const TILE_INDEX = (globalThis.__RZC_TILE_GALLERY_TILE_INDEX__ =
+    globalThis.__RZC_TILE_GALLERY_TILE_INDEX__ || new Map());
   const BRIDGE_EVENT = bridgeProtocol.TYPE || "RZC_TILE_GALLERY_PRODUCTS";
   const BRIDGE_SOURCE = bridgeProtocol.SOURCE || "RZC_PAGE_BRIDGE";
   const BRIDGE_REQUEST_SOURCE = bridgeProtocol.REQUEST_SOURCE || "RZC_TILE_GALLERY_CONTENT";
@@ -89,6 +93,55 @@
       if (oldestKey === undefined) break;
       map.delete(oldestKey);
     }
+  }
+
+  function toProductId(value) {
+    return String(value || "").trim();
+  }
+
+  function sameStringList(a, b) {
+    if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) return false;
+    for (let i = 0; i < a.length; i += 1) {
+      if (a[i] !== b[i]) return false;
+    }
+    return true;
+  }
+
+  function clearTileIndex(tile) {
+    if (!tile || tile.nodeType !== Node.ELEMENT_NODE) return;
+    const prevId = toProductId(tile.getAttribute(PRODUCT_ID_ATTR));
+    if (!prevId) {
+      tile.removeAttribute(PRODUCT_ID_ATTR);
+      return;
+    }
+    const prevSet = TILE_INDEX.get(prevId);
+    if (prevSet) {
+      prevSet.delete(tile);
+      if (!prevSet.size) TILE_INDEX.delete(prevId);
+    }
+    tile.removeAttribute(PRODUCT_ID_ATTR);
+  }
+
+  function indexTileByProductId(tile, productId) {
+    if (!tile || tile.nodeType !== Node.ELEMENT_NODE) return;
+    const nextId = toProductId(productId);
+    const prevId = toProductId(tile.getAttribute(PRODUCT_ID_ATTR));
+    if (prevId && prevId !== nextId) {
+      const prevSet = TILE_INDEX.get(prevId);
+      if (prevSet) {
+        prevSet.delete(tile);
+        if (!prevSet.size) TILE_INDEX.delete(prevId);
+      }
+      tile.removeAttribute(PRODUCT_ID_ATTR);
+    }
+    if (!nextId) return;
+    let bucket = TILE_INDEX.get(nextId);
+    if (!bucket) {
+      bucket = new Set();
+      TILE_INDEX.set(nextId, bucket);
+    }
+    bucket.add(tile);
+    tile.setAttribute(PRODUCT_ID_ATTR, nextId);
   }
 
   function isProductImageUrl(url) {
@@ -275,12 +328,33 @@
   }
 
   function fetchProductUrls(productId, href) {
-    const key = productId || href;
-    if (!key || !href || typeof fetch !== "function") return Promise.resolve([]);
+    const targetHref = toAbsoluteUrl(href);
+    const key = productId || targetHref;
+    if (!key || !targetHref || typeof fetch !== "function") return Promise.resolve([]);
 
     if (REMOTE_CACHE.has(key)) return REMOTE_CACHE.get(key);
 
-    const inflight = fetch(href, { credentials: "include" })
+    // Remote fallback parsing is safe only for same-origin pages.
+    // Cross-origin product mirrors frequently fail with CORS and spam the console.
+    try {
+      let pageOrigin = "";
+      if (typeof location !== "undefined" && location) {
+        if (typeof location.origin === "string" && location.origin) {
+          pageOrigin = location.origin;
+        } else if (typeof location.href === "string" && location.href) {
+          pageOrigin = new URL(location.href).origin;
+        }
+      }
+      const targetOrigin = new URL(targetHref).origin;
+      if (pageOrigin && targetOrigin !== pageOrigin) {
+        const blocked = Promise.resolve([]);
+        REMOTE_CACHE.set(key, blocked);
+        trimMap(REMOTE_CACHE, MAX_REMOTE_CACHE_SIZE);
+        return blocked;
+      }
+    } catch (_error) {}
+
+    const inflight = fetch(targetHref, { credentials: "include" })
       .then((response) => {
         if (!response || !response.ok || typeof response.text !== "function") return "";
         return response.text();
@@ -430,6 +504,7 @@
   }
 
   function cacheProductsFromPayload(payload) {
+    const updatedProductIds = new Set();
     walkProducts(payload, (product) => {
       const id = product && product.id ? String(product.id) : "";
       if (!id) return;
@@ -441,11 +516,40 @@
         .filter(isProductImageUrl);
       const displayUrls = toDisplayUrls(urls).filter(isProductImageUrl);
       if (displayUrls.length < 2) return;
+      const prevEntry = CACHE.get(id);
+      if (prevEntry && sameStringList(prevEntry.urls, displayUrls)) return;
       CACHE.set(id, { urls: displayUrls });
       trimMap(CACHE, MAX_PRODUCT_CACHE_SIZE);
+      updatedProductIds.add(id);
       STATS.lastUpdatedAt = Date.now();
       log("cache-set", { productId: id, count: displayUrls.length, cacheSize: CACHE.size });
     }, typeof WeakSet === "function" ? new WeakSet() : null);
+    return updatedProductIds;
+  }
+
+  function refreshTilesForProductIds(ctx, productIds) {
+    if (!ctx || !productIds || typeof productIds.forEach !== "function") return;
+    const refreshed = new Set();
+    productIds.forEach((id) => {
+      const productId = toProductId(id);
+      if (!productId) return;
+      const bucket = TILE_INDEX.get(productId);
+      if (!bucket || !bucket.size) return;
+      Array.from(bucket).forEach((tile) => {
+        if (!tile || tile.nodeType !== Node.ELEMENT_NODE) {
+          bucket.delete(tile);
+          return;
+        }
+        if (typeof tile.isConnected === "boolean" && !tile.isConnected) {
+          bucket.delete(tile);
+          return;
+        }
+        if (refreshed.has(tile)) return;
+        refreshed.add(tile);
+        setupTileGallery(ctx, tile);
+      });
+      if (!bucket.size) TILE_INDEX.delete(productId);
+    });
   }
 
   function installPageBridge() {
@@ -462,8 +566,8 @@
           bridgeMessages: STATS.bridgeMessages,
           payloadItems: Array.isArray(data.payload && data.payload.data) ? data.payload.data.length : 0
         });
-        cacheProductsFromPayload(data.payload);
-        if (lastCtx) applyTileGalleries(lastCtx, document);
+        const updatedProductIds = cacheProductsFromPayload(data.payload);
+        if (lastCtx && updatedProductIds.size) refreshTilesForProductIds(lastCtx, updatedProductIds);
       });
 
       if (typeof window.postMessage === "function") {
@@ -518,6 +622,7 @@
     const promise = new Promise((resolve) => {
       const done = () => {
         PRELOAD_STATE.set(url, { status: "loaded", promise: Promise.resolve() });
+        trimMap(PRELOAD_STATE, MAX_PRELOAD_CACHE_SIZE);
         resolve();
       };
       img.onload = done;
@@ -526,6 +631,7 @@
     });
 
     PRELOAD_STATE.set(url, { status: "loading", promise });
+    trimMap(PRELOAD_STATE, MAX_PRELOAD_CACHE_SIZE);
     return promise;
   }
 
@@ -711,7 +817,10 @@
     if (hasReadyMarker) maybeRefreshReadyTileFromCache(tile);
 
     const primaryImg = findPrimaryImage(ctx, tile);
-    if (!primaryImg) return;
+    if (!primaryImg) {
+      clearTileIndex(tile);
+      return;
+    }
 
     const host = findImageHost(ctx, tile, primaryImg);
     const imgNodes = ctx.safeQueryAll(host, "img");
@@ -727,6 +836,7 @@
     collectUrlsFromAttributes(tile).forEach((url) => collected.push(url));
 
     const productId = readProductId(tile);
+    indexTileByProductId(tile, productId);
     const cachedProductUrls = productUrlsFromCache(productId);
     cachedProductUrls.forEach((url) => collected.push(url));
     const cacheUrls = uniqueNonEmpty(cachedProductUrls.filter(isProductImageUrl));
@@ -822,6 +932,7 @@
     const scope = root && root.querySelectorAll ? root : document;
     ctx.safeQueryAll(scope, "rz-product-tile").forEach((tile) => {
       unbindRemoteFallback(tile);
+      clearTileIndex(tile);
       tile.removeAttribute(READY_ATTR);
       tile.removeAttribute(URLS_ATTR);
       tile.removeAttribute(INDEX_ATTR);
@@ -879,6 +990,7 @@
       return {
         ...STATS,
         cacheSize: CACHE.size,
+        indexSize: TILE_INDEX.size,
         recentEvents: EVENTS.slice(-20)
       };
     },

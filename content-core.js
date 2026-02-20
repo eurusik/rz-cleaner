@@ -45,6 +45,7 @@
   const STORAGE_KEY = CONFIG.storageKey || "rzc_settings";
   const DIAGNOSTICS_STORAGE_KEY = `${STORAGE_KEY}_diagnostics`;
   const DIAGNOSTICS_DEBOUNCE_MS = 450;
+  const DIAGNOSTICS_MIN_SCHEDULE_MS = 1200;
   const ROOT_CLASS_NORMALIZE = CONFIG.rootClassNormalizePrice || "rzc-normalize-price";
   const HIDDEN_CLASS = CONFIG.hiddenClass || "rzc-hidden";
   const DEFAULTS = CONFIG.defaults || {};
@@ -162,6 +163,7 @@
   let cleanupTimer = 0;
   let settingsSyncTimer = 0;
   let diagnosticsTimer = 0;
+  let diagnosticsLastScheduledAt = 0;
   const pendingRoots = new Set();
   let onStorageChanged = null;
   let onRuntimeMessage = null;
@@ -301,10 +303,18 @@
     if (!el || el.nodeType !== Node.ELEMENT_NODE) return;
 
     const featureSet = parseFeatureSet(el);
+    const hadFeature = featureId ? featureSet.has(featureId) : false;
     if (featureId) featureSet.add(featureId);
     if (!featureSet.size) return;
 
-    writeFeatureSet(el, featureSet);
+    if (!hadFeature || !el.hasAttribute(HIDDEN_FEATURES_ATTR)) {
+      writeFeatureSet(el, featureSet);
+    }
+
+    if (el.getAttribute(HIDDEN_ATTR) === "1" && el.classList.contains(HIDDEN_CLASS)) {
+      return;
+    }
+
     el.setAttribute(HIDDEN_ATTR, "1");
     el.classList.add(HIDDEN_CLASS);
     applyHideStyles(el);
@@ -519,8 +529,13 @@
     });
   }
 
-  function scheduleDiagnostics(settings) {
+  function scheduleDiagnostics(settings, root = document) {
     if (!chrome.storage || !chrome.storage.local) return;
+    const now = Date.now();
+    if (root !== document && now - diagnosticsLastScheduledAt < DIAGNOSTICS_MIN_SCHEDULE_MS) {
+      return;
+    }
+    diagnosticsLastScheduledAt = now;
     if (diagnosticsTimer) window.clearTimeout(diagnosticsTimer);
     diagnosticsTimer = window.setTimeout(() => flushDiagnostics(settings), DIAGNOSTICS_DEBOUNCE_MS);
   }
@@ -531,7 +546,7 @@
       if (typeof FEATURE_REGISTRY.onDisabled === "function") {
         FEATURE_REGISTRY.onDisabled(context, root);
       }
-      scheduleDiagnostics(settings);
+      scheduleDiagnostics(settings, root);
       return;
     }
 
@@ -539,7 +554,7 @@
       FEATURE_REGISTRY.runFeatureCleanup(context, root, settings);
     }
     hideCustomSelectors(root, settings);
-    scheduleDiagnostics(settings);
+    scheduleDiagnostics(settings, root);
   }
 
   function containsHintTargets(node) {

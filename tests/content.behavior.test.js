@@ -556,6 +556,102 @@ test('content retries remote fallback fetch after initial empty result', async (
   assert.equal(tile.getAttribute('data-rzc-tile-gallery-ready'), '1');
 });
 
+test('content skips cross-origin remote fallback fetch to avoid CORS retries', async () => {
+  let fetchCallCount = 0;
+  const harness = createHarness(
+    {},
+    {
+      fetchImpl: async () => {
+        fetchCallCount += 1;
+        return {
+          ok: true,
+          text: async () => ''
+        };
+      },
+      locationHref: 'https://rozetka.com.ua/ua/mobile-phones/c80003/'
+    }
+  );
+
+  const tile = harness.createElement('rz-product-tile');
+  const imageHost = harness.createElement('a', { classes: ['tile-image-host'] });
+  imageHost.setAttribute('href', 'https://hard.rozetka.com.ua/ua/apple-iphone-17-pro-256gb/p543545605/');
+  const image = harness.createElement('img', { classes: ['tile-image'] });
+  image.setAttribute('src', 'https://content.rozetka.com.ua/goods/images/big_tile/594346714.jpg');
+  imageHost.appendChild(image);
+  tile.appendChild(imageHost);
+
+  harness.document.setQueryResult('rz-product-tile', [tile]);
+  tile.setQueryResult('a.tile-image-host img.tile-image', [image]);
+  tile.setQueryResult('img', [image]);
+  tile.setQueryResult('a.tile-image-host', [imageHost]);
+  tile.setQueryResult('a.tile-image-host[href]', [imageHost]);
+  tile.setQueryResult('a.tile-title[href]', []);
+  tile.setQueryResult("a[href*='/p']", [imageHost]);
+  imageHost.setQueryResult('img', [image]);
+  tile.setQueryResult(`[data-rzc-tile-gallery-btn]`, []);
+
+  await harness.runContent();
+  for (let i = 0; i < 10; i += 1) {
+    await Promise.resolve();
+  }
+
+  const hoverHandlers = imageHost.listeners.get('mouseenter') || [];
+  if (hoverHandlers[0]) hoverHandlers[0]();
+  if (hoverHandlers[0]) hoverHandlers[0]();
+
+  const arrows = imageHost.children.filter((node) => node.getAttribute('data-rzc-tile-gallery-btn'));
+  assert.equal(fetchCallCount, 0);
+  assert.equal(arrows.length, 0);
+});
+
+test('content refreshes indexed tile gallery when bridge delivers matching product images', async () => {
+  const harness = createHarness({}, { locationHref: 'https://rozetka.com.ua/ua/mobile-phones/c80003/' });
+  const tile = harness.createElement('rz-product-tile');
+  const imageHost = harness.createElement('a', { classes: ['tile-image-host'] });
+  imageHost.setAttribute('href', '/ua/apple-iphone-17-pro-256gb-deep-blue-mg8j4af-a/p543545605/');
+  const image = harness.createElement('img', { classes: ['tile-image'] });
+  image.setAttribute('src', 'https://content.rozetka.com.ua/goods/images/big_tile/594346714.jpg');
+  imageHost.appendChild(image);
+  tile.appendChild(imageHost);
+
+  harness.document.setQueryResult('rz-product-tile', [tile]);
+  tile.setQueryResult('a.tile-image-host img.tile-image', [image]);
+  tile.setQueryResult('img', [image]);
+  tile.setQueryResult('a.tile-image-host', [imageHost]);
+  tile.setQueryResult('a.tile-image-host[href]', [imageHost]);
+  tile.setQueryResult('a.tile-title[href]', []);
+  tile.setQueryResult("a[href*='/p']", [imageHost]);
+  imageHost.setQueryResult('img', [image]);
+  tile.setQueryResult(`[data-rzc-tile-gallery-btn]`, []);
+
+  await harness.runContent();
+
+  let arrows = imageHost.children.filter((node) => node.getAttribute('data-rzc-tile-gallery-btn'));
+  assert.equal(arrows.length, 0);
+
+  harness.emitWindowMessage({
+    source: 'RZC_PAGE_BRIDGE',
+    type: 'RZC_TILE_GALLERY_PRODUCTS',
+    payload: {
+      data: [
+        {
+          id: '543545605',
+          images: {
+            all: [
+              'https://content.rozetka.com.ua/goods/images/original/594346714.jpg',
+              'https://content.rozetka.com.ua/goods/images/original/594346720.jpg'
+            ]
+          }
+        }
+      ]
+    }
+  });
+
+  arrows = imageHost.children.filter((node) => node.getAttribute('data-rzc-tile-gallery-btn'));
+  assert.equal(arrows.length, 2);
+  assert.equal(tile.getAttribute('data-rzc-tile-gallery-ready'), '1');
+});
+
 test('content mounts gallery arrows on tile-image-host instead of wrapper div', async () => {
   const harness = createHarness();
   const tile = harness.createElement('rz-product-tile');
