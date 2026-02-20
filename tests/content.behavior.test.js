@@ -208,6 +208,57 @@ test('content does not apply hiding when extension is paused', async () => {
   assert.equal(isHidden(targets.productPictograms), false);
 });
 
+test('content coerces string boolean toggles from storage', async () => {
+  const harness = createHarness({
+    hideSmartDeliveryBadge: 'false',
+    hideEmailSubscriptionBanner: 'false',
+    hideSuperOffer: 'false',
+    hideProductServices: 'false',
+    hideStickyProductCarriage: 'false',
+    hidePromotionProduct: 'false',
+    hideProductPictograms: 'false'
+  });
+  const targets = makeTargets(harness);
+  wireSmartAndEmailSelectors(harness, targets);
+
+  await harness.runContent();
+
+  assert.equal(isHidden(targets.deliveryPrice), false);
+  assert.equal(isHidden(targets.deliveryPremium), false);
+  assert.equal(isHidden(targets.emailBanner), false);
+  assert.equal(isHidden(targets.superOffer), false);
+  assert.equal(isHidden(targets.productServices), false);
+  assert.equal(isHidden(targets.stickyCarriage), false);
+  assert.equal(isHidden(targets.promotionProduct), false);
+  assert.equal(isHidden(targets.productPictograms), false);
+});
+
+test('content treats enabled=\"false\" in storage as disabled extension state', async () => {
+  const harness = createHarness({
+    hideSmartDeliveryBadge: true,
+    hideEmailSubscriptionBanner: true,
+    hideSuperOffer: true,
+    hideProductServices: true,
+    hideStickyProductCarriage: true,
+    hidePromotionProduct: true,
+    hideProductPictograms: true,
+    enabled: 'false'
+  });
+  const targets = makeTargets(harness);
+  wireSmartAndEmailSelectors(harness, targets);
+
+  await harness.runContent();
+
+  assert.equal(isHidden(targets.deliveryPrice), false);
+  assert.equal(isHidden(targets.deliveryPremium), false);
+  assert.equal(isHidden(targets.emailBanner), false);
+  assert.equal(isHidden(targets.superOffer), false);
+  assert.equal(isHidden(targets.productServices), false);
+  assert.equal(isHidden(targets.stickyCarriage), false);
+  assert.equal(isHidden(targets.promotionProduct), false);
+  assert.equal(isHidden(targets.productPictograms), false);
+});
+
 test('content reveals blocks when settings toggle off via storage change', async () => {
   const harness = createHarness();
   const targets = makeTargets(harness);
@@ -569,6 +620,47 @@ test('content recreates tile gallery arrows when ready tile state exists but arr
 
   const arrows = imageHost.children.filter((node) => node.getAttribute('data-rzc-tile-gallery-btn'));
   assert.equal(arrows.length, 2);
+});
+
+test('content ignores cyclic bridge payloads without throwing', async () => {
+  const harness = createHarness();
+  await harness.runContent();
+
+  const payload = { data: [] };
+  payload.self = payload;
+
+  assert.doesNotThrow(() => {
+    harness.emitWindowMessage({
+      source: 'RZC_PAGE_BRIDGE',
+      type: 'RZC_TILE_GALLERY_PRODUCTS',
+      payload
+    });
+  });
+});
+
+test('content caps tile gallery cache size after many bridge updates', async () => {
+  const harness = createHarness();
+  await harness.runContent();
+
+  const products = Array.from({ length: 3105 }, (_, idx) => ({
+    id: String(idx + 1),
+    images: {
+      all: [
+        `https://content.rozetka.com.ua/goods/images/original/${idx + 1}-a.jpg`,
+        `https://content.rozetka.com.ua/goods/images/original/${idx + 1}-b.jpg`
+      ]
+    }
+  }));
+
+  harness.emitWindowMessage({
+    source: 'RZC_PAGE_BRIDGE',
+    type: 'RZC_TILE_GALLERY_PRODUCTS',
+    payload: { data: products }
+  });
+
+  const stats = harness.getTileGalleryStats();
+  assert.ok(stats);
+  assert.equal(stats.cacheSize, 3000);
 });
 
 test('content collapses store rich content and restores it when extension is disabled', async () => {

@@ -167,6 +167,7 @@ function createHarness(initialSettings = {}, options = {}) {
   const document = new FakeDocument();
   const allElements = new Set();
   const storageListeners = [];
+  const windowListeners = new Map();
   let syncSettings = { ...initialSettings };
   let lastObserver = null;
   let timerId = 0;
@@ -206,7 +207,16 @@ function createHarness(initialSettings = {}, options = {}) {
       return timerId;
     },
     clearTimeout: () => {},
-    addEventListener: () => {},
+    addEventListener: (type, cb) => {
+      const list = windowListeners.get(type) || [];
+      list.push(cb);
+      windowListeners.set(type, list);
+    },
+    removeEventListener: (type, cb) => {
+      const list = windowListeners.get(type) || [];
+      const next = list.filter((fn) => fn !== cb);
+      windowListeners.set(type, next);
+    },
     getComputedStyle: () => ({ position: 'static', zIndex: 'auto' }),
     fetch: initialFetch,
     location: { href: locationHref },
@@ -293,6 +303,16 @@ function createHarness(initialSettings = {}, options = {}) {
     setFetch: (nextFetch) => {
       window.fetch = nextFetch;
       sandbox.fetch = nextFetch;
+    },
+    emitWindowMessage: (data) => {
+      const listeners = windowListeners.get('message') || [];
+      listeners.forEach((listener) => listener({ data }));
+    },
+    getTileGalleryStats: () => {
+      if (!sandbox.RZCTileGalleryDebug || typeof sandbox.RZCTileGalleryDebug.getStats !== 'function') {
+        return null;
+      }
+      return sandbox.RZCTileGalleryDebug.getStats();
     }
   };
 }

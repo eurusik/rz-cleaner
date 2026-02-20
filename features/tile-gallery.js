@@ -13,6 +13,8 @@
   const URL_RE = /https?:\/\/[^"'\\)\s>]+?\.(?:jpg|jpeg|png|webp|gif)/gi;
   const AUTO_REMOTE_FETCH_LIMIT = 24;
   const AUTO_REMOTE_FETCH_BASE_DELAY_MS = 220;
+  const MAX_PRODUCT_CACHE_SIZE = 3000;
+  const MAX_REMOTE_CACHE_SIZE = 800;
   const bridgeProtocol = globalThis.RZCTileGalleryBridgeProtocol || {};
   const CACHE = (globalThis.__RZC_TILE_GALLERY_CACHE__ = globalThis.__RZC_TILE_GALLERY_CACHE__ || new Map());
   const REMOTE_CACHE = (globalThis.__RZC_TILE_GALLERY_REMOTE_CACHE__ =
@@ -78,6 +80,15 @@
       result.push(normalized);
     });
     return result.slice(0, limit);
+  }
+
+  function trimMap(map, maxSize) {
+    if (!map || typeof map.size !== "number" || typeof map.delete !== "function") return;
+    while (map.size > maxSize) {
+      const oldestKey = map.keys().next().value;
+      if (oldestKey === undefined) break;
+      map.delete(oldestKey);
+    }
   }
 
   function isProductImageUrl(url) {
@@ -283,8 +294,12 @@
       .then((urls) => {
         const safeUrls = Array.isArray(urls) ? urls : [];
         if (safeUrls.length >= 2) {
-          if (productId) CACHE.set(productId, { urls: safeUrls });
+          if (productId) {
+            CACHE.set(productId, { urls: safeUrls });
+            trimMap(CACHE, MAX_PRODUCT_CACHE_SIZE);
+          }
           REMOTE_CACHE.set(key, Promise.resolve(safeUrls));
+          trimMap(REMOTE_CACHE, MAX_REMOTE_CACHE_SIZE);
           return safeUrls;
         }
         // Do not keep negative cache forever. Retry is allowed on next hover/touch.
@@ -293,6 +308,7 @@
       });
 
     REMOTE_CACHE.set(key, inflight);
+    trimMap(REMOTE_CACHE, MAX_REMOTE_CACHE_SIZE);
     return inflight;
   }
 
@@ -397,10 +413,12 @@
     return entry.urls;
   }
 
-  function walkProducts(node, consume) {
+  function walkProducts(node, consume, seen) {
     if (!node || typeof node !== "object") return;
+    if (seen && seen.has(node)) return;
+    if (seen) seen.add(node);
     if (Array.isArray(node)) {
-      node.forEach((item) => walkProducts(item, consume));
+      node.forEach((item) => walkProducts(item, consume, seen));
       return;
     }
 
@@ -408,7 +426,7 @@
       consume(node);
     }
 
-    Object.keys(node).forEach((key) => walkProducts(node[key], consume));
+    Object.keys(node).forEach((key) => walkProducts(node[key], consume, seen));
   }
 
   function cacheProductsFromPayload(payload) {
@@ -424,9 +442,10 @@
       const displayUrls = toDisplayUrls(urls).filter(isProductImageUrl);
       if (displayUrls.length < 2) return;
       CACHE.set(id, { urls: displayUrls });
+      trimMap(CACHE, MAX_PRODUCT_CACHE_SIZE);
       STATS.lastUpdatedAt = Date.now();
       log("cache-set", { productId: id, count: displayUrls.length, cacheSize: CACHE.size });
-    });
+    }, typeof WeakSet === "function" ? new WeakSet() : null);
   }
 
   function installPageBridge() {

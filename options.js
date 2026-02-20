@@ -557,6 +557,7 @@
     if (extensionEnabledEl) {
       extensionEnabledEl.addEventListener("change", () => {
         currentSettings[ENABLED_KEY] = extensionEnabledEl.checked;
+        currentSettings.pauseUntil = 0;
         updateQuickSettingsState(extensionEnabledEl.checked);
         scheduleSave(0);
       });

@@ -722,8 +722,23 @@
   }
 
   function normalizeSettings(raw) {
+    function coerceBoolean(value, fallback) {
+      if (typeof value === "boolean") return value;
+      if (typeof value === "number") return value !== 0;
+      if (typeof value === "string") {
+        const normalized = value.trim().toLowerCase();
+        if (normalized === "true" || normalized === "1") return true;
+        if (normalized === "false" || normalized === "0") return false;
+      }
+      return fallback;
+    }
+
     const merged = { ...DEFAULTS, ...(raw || {}) };
-    merged.enabled = merged.enabled !== false;
+    Object.keys(DEFAULTS).forEach((key) => {
+      if (typeof DEFAULTS[key] !== "boolean") return;
+      merged[key] = coerceBoolean(merged[key], Boolean(DEFAULTS[key]));
+    });
+    merged.enabled = coerceBoolean(merged.enabled, true);
     merged.pauseUntil = Number.isFinite(Number(merged.pauseUntil)) ? Number(merged.pauseUntil) : 0;
     merged.customHideSelectors = typeof merged.customHideSelectors === "string" ? merged.customHideSelectors : "";
     merged.aiButtonTexts = typeof merged.aiButtonTexts === "string" ? merged.aiButtonTexts : "";

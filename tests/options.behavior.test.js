@@ -84,6 +84,24 @@ test('options saves global enabled toggle', async () => {
   assert.equal(lastCall.rzc_settings.enabled, false);
 });
 
+test('options clears pauseUntil when global enabled toggle changes', async () => {
+  const harness = createHarness({
+    syncSettings: {
+      enabled: false,
+      pauseUntil: 9999999999999
+    }
+  });
+  await harness.runOptions();
+
+  const enabledToggle = harness.getById('extensionEnabled');
+  enabledToggle.checked = true;
+  enabledToggle.dispatch('change');
+
+  const lastCall = harness.syncSetCalls[harness.syncSetCalls.length - 1];
+  assert.equal(lastCall.rzc_settings.enabled, true);
+  assert.equal(lastCall.rzc_settings.pauseUntil, 0);
+});
+
 test('recommended settings button enables extension and applies defaults', async () => {
   const harness = createHarness({
     syncSettings: {
