@@ -768,8 +768,31 @@ test('content collapses store rich content and restores it when extension is dis
   });
   richBlock.appendChild(richContent);
 
-  harness.document.setQueryResult('rz-store-rich-content', [richBlock]);
-  richBlock.setQueryResult('.rich-content', [richContent]);
+  harness.document.setQueryResult('rz-store-rich-content, rz-rich-content', [richBlock]);
+  richBlock.setQueryResult('.rich-content, .rich', [richContent]);
+
+  await harness.runContent();
+
+  assert.equal(richBlock.classList.contains('rzc-rich-collapsed'), true);
+  assert.equal(richBlock.getAttribute('data-rzc-rich-collapsible'), '1');
+
+  await harness.emitSettingsChange({ enabled: false });
+
+  assert.equal(richBlock.classList.contains('rzc-rich-collapsed'), false);
+  assert.equal(richBlock.getAttribute('data-rzc-rich-collapsible'), null);
+});
+
+test('content collapses rz-rich-content blocks and restores them when extension is disabled', async () => {
+  const harness = createHarness({ enabled: true });
+  const richBlock = harness.createElement('rz-rich-content');
+  const richContent = harness.createElement('div', {
+    classes: ['rich', 'text-overflow', 'open'],
+    textContent: 'x'.repeat(240)
+  });
+  richBlock.appendChild(richContent);
+
+  harness.document.setQueryResult('rz-store-rich-content, rz-rich-content', [richBlock]);
+  richBlock.setQueryResult('.rich-content, .rich', [richContent]);
 
   await harness.runContent();
 

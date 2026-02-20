@@ -1,9 +1,28 @@
 (function () {
   "use strict";
 
-  function getFirstQuery(ctx, scope, selector) {
-    const list = ctx.safeQueryAll(scope, selector);
-    return list && list.length ? list[0] : null;
+  const RICH_BLOCK_SELECTOR = "rz-store-rich-content, rz-rich-content";
+  const RICH_CONTENT_SELECTOR = ".rich-content, .rich";
+  const MIN_RICH_TEXT_LENGTH = 180;
+
+  function findBestRichContent(ctx, block) {
+    const candidates = ctx.safeQueryAll(block, RICH_CONTENT_SELECTOR);
+    if (!candidates || !candidates.length) return null;
+
+    let best = null;
+    let bestLength = 0;
+
+    candidates.forEach((node) => {
+      if (!node || node.nodeType !== Node.ELEMENT_NODE) return;
+      const length = (node.textContent || "").trim().length;
+      if (length > bestLength) {
+        best = node;
+        bestLength = length;
+      }
+    });
+
+    if (!best || bestLength < MIN_RICH_TEXT_LENGTH) return null;
+    return best;
   }
 
   function updateRichToggleText(button, expanded) {
@@ -15,9 +34,8 @@
     if (!block || block.nodeType !== Node.ELEMENT_NODE) return;
     if (block.getAttribute(ctx.RICH_COLLAPSIBLE_ATTR) === "1") return;
 
-    const content = getFirstQuery(ctx, block, ".rich-content");
+    const content = findBestRichContent(ctx, block);
     if (!content) return;
-    if ((content.textContent || "").trim().length < 180) return;
 
     const toggle = document.createElement("button");
     toggle.type = "button";
@@ -44,12 +62,12 @@
 
   function applyRichContentSpoilers(ctx, root) {
     const scope = root && root.querySelectorAll ? root : document;
-    ctx.safeQueryAll(scope, "rz-store-rich-content").forEach((block) => setupRichContentSpoiler(ctx, block));
+    ctx.safeQueryAll(scope, RICH_BLOCK_SELECTOR).forEach((block) => setupRichContentSpoiler(ctx, block));
   }
 
   function removeRichContentSpoilers(ctx, root) {
     const scope = root && root.querySelectorAll ? root : document;
-    ctx.safeQueryAll(scope, "rz-store-rich-content").forEach((block) => {
+    ctx.safeQueryAll(scope, RICH_BLOCK_SELECTOR).forEach((block) => {
       block.classList.remove("rzc-rich-collapsed");
       block.removeAttribute(ctx.RICH_COLLAPSIBLE_ATTR);
       ctx.safeQueryAll(block, `[${ctx.RICH_TOGGLE_ATTR}]`).forEach((btn) => {

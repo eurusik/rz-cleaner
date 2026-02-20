@@ -73,6 +73,7 @@
     "rz-product-carriage",
     "rz-promotion-product",
     "rz-store-rich-content",
+    "rz-rich-content",
     "rz-tag-list",
     '[data-testid="advertising-slider"]',
     '[data-testid="promo-price"]',
@@ -116,6 +117,7 @@
     "RZ-PRODUCT-CARRIAGE",
     "RZ-PROMOTION-PRODUCT",
     "RZ-STORE-RICH-CONTENT",
+    "RZ-RICH-CONTENT",
     "RZ-TAG-LIST"
   ]);
   const HINT_CLASSES = [

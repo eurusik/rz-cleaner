@@ -74,6 +74,11 @@ test('styles keep native rich-content button hidden when custom spoiler is activ
     'rz-store-rich-content[data-rzc-rich-collapsible="1"] rz-read-all-btn',
     'styles.css'
   );
+  mustContain(
+    styles,
+    'rz-rich-content[data-rzc-rich-collapsible="1"] rz-read-all-btn',
+    'styles.css'
+  );
 });
 
 test('feature registry aggregates modules', () => {
@@ -93,7 +98,9 @@ test('content observer hints include smart/delivery/email and rich tags', () => 
   mustContain(core, '"rz-product-services"', 'content-core.js');
   mustContain(core, '"rz-product-carriage"', 'content-core.js');
   mustContain(core, '"rz-store-rich-content"', 'content-core.js');
+  mustContain(core, '"rz-rich-content"', 'content-core.js');
   mustContain(core, '"RZ-STORE-RICH-CONTENT"', 'content-core.js');
+  mustContain(core, '"RZ-RICH-CONTENT"', 'content-core.js');
   mustContain(core, '"RZ-PRODUCT-CARRIAGE"', 'content-core.js');
   mustContain(core, '"RZ-PRODUCT-PICTOGRAMS"', 'content-core.js');
   mustContain(core, '"RZ-PROMOTION-PRODUCT"', 'content-core.js');
