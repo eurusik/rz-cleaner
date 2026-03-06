@@ -90,9 +90,9 @@
         "rz-chat-bot-button-placeholder .invitation"
       ],
       popularSearchChips: [
-        { query: "div.md\\:order-1 rz-tag-list.max-three-rows", closest: "div.md\\:order-1" },
-        { query: "div.md\\:order-1 rz-tag-list .tags-list", closest: "div.md\\:order-1" },
-        { query: "rz-tag-list.max-three-rows", closest: "div.md\\:order-1" }
+        { query: "rz-tag-list.max-three-rows", closest: "rz-tag-list" },
+        { query: "rz-tag-list .tags-list", closest: "rz-tag-list, .tags-list" },
+        { query: ".tags-list", closest: "rz-tag-list, .tags-list" }
       ],
       smartDeliveryBadge: [
         {

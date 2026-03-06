@@ -359,6 +359,46 @@ test('content reveals blocks when settings toggle off via storage change', async
   assert.equal(targets.productPictograms.classList.contains(HIDDEN_CLASS), false);
 });
 
+test('content hides only popular search chips block and keeps catalog container visible', async () => {
+  const harness = createHarness();
+  const mainContainer = harness.createElement('div', { classes: ['md:order-1'] });
+  const tagList = harness.createElement('rz-tag-list', { classes: ['max-three-rows'] });
+  const tagsList = harness.createElement('div', { classes: ['tags-list'] });
+
+  mainContainer.appendChild(tagList);
+  tagList.appendChild(tagsList);
+
+  harness.document.setQueryResult('rz-tag-list.max-three-rows', [tagList]);
+  harness.document.setQueryResult('rz-tag-list .tags-list', [tagsList]);
+  harness.document.setQueryResult('.tags-list', [tagsList]);
+
+  await harness.runContent();
+
+  assert.equal(isHidden(mainContainer), false);
+  assert.equal(isHidden(tagList), true);
+});
+
+test('popular search text fallback does not hide the whole catalog section wrapper', async () => {
+  const harness = createHarness();
+  const mainContainer = harness.createElement('div');
+  const title = harness.createElement('h3', { textContent: 'Популярні запити' });
+  const tagList = harness.createElement('rz-tag-list');
+  const tagsList = harness.createElement('div', { classes: ['tags-list'] });
+
+  mainContainer.appendChild(title);
+  mainContainer.appendChild(tagList);
+  tagList.appendChild(tagsList);
+  mainContainer.textContent = 'Популярні запити';
+
+  mainContainer.setQueryResult('rz-tag-list, .tags-list', [tagList, tagsList]);
+  harness.document.setQueryResult('div, p, span, h2, h3, h4', [mainContainer, title]);
+
+  await harness.runContent();
+
+  assert.equal(isHidden(mainContainer), false);
+  assert.equal(isHidden(tagList), true);
+});
+
 test('content applies hiding after pause ends via storage change', async () => {
   const harness = createHarness({
     hideSmartDeliveryBadge: true,

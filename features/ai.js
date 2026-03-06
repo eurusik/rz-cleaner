@@ -13,6 +13,24 @@
     return ctx.SELECTORS.popularSearchChips || [];
   }
 
+  function findPopularSearchContainer(ctx, node) {
+    if (!node || node.nodeType !== Node.ELEMENT_NODE) return null;
+
+    const ownContainer = ctx.safeClosest(node, "rz-tag-list, .tags-list");
+    if (ownContainer) return ownContainer;
+
+    const localHosts = ctx.safeQueryAll(node, "rz-tag-list, .tags-list");
+    if (localHosts.length) return localHosts[0];
+
+    const parent = node.parentElement;
+    if (!parent || parent.nodeType !== Node.ELEMENT_NODE) return null;
+
+    const parentHosts = ctx.safeQueryAll(parent, "rz-tag-list, .tags-list");
+    if (parentHosts.length) return parentHosts[0];
+
+    return null;
+  }
+
   function hideRozetkaAIWidget(ctx, root, settings) {
     if (!settings.hideRozetkaAI) return;
     const scope = root && root.querySelectorAll ? root : document;
@@ -81,16 +99,8 @@
       const text = (el.textContent || "").trim().toLowerCase();
       if (!ctx.textContainsAny(text, settings.popularSearchTextList)) return;
 
-      const parent = el.parentElement;
-      if (parent && ctx.safeQueryAll(parent, "rz-tag-list, .tags-list").length) {
-        ctx.hideElement(parent, ctx.FEATURE.POPULAR_SEARCH_CHIPS);
-        return;
-      }
-
-      const block = el.closest("div");
-      if (block && ctx.safeQueryAll(block, "rz-tag-list, .tags-list").length) {
-        ctx.hideElement(block, ctx.FEATURE.POPULAR_SEARCH_CHIPS);
-      }
+      const container = findPopularSearchContainer(ctx, el);
+      if (container) ctx.hideElement(container, ctx.FEATURE.POPULAR_SEARCH_CHIPS);
     });
   }
 
