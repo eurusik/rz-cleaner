@@ -69,7 +69,12 @@
       root,
       aiConsultationSelectors(ctx),
       ctx.FEATURE.AI_CONSULT,
-      ["rz-chat-bot-button-placeholder"]
+      [
+        "rz-chat-bot-button-placeholder",
+        "rz-chat-bot-invitation",
+        ".invitations-wrapper",
+        ".invitation-wrapper"
+      ]
     );
 
     if (matchedBySelectors) return;
@@ -81,7 +86,10 @@
       const text = (el.textContent || "").trim().toLowerCase();
       if (!ctx.textContainsAny(text, settings.aiConsultationTextList)) return;
       ctx.hideElement(el, ctx.FEATURE.AI_CONSULT);
-      ctx.hideElement(el.closest("rz-chat-bot-button-placeholder"), ctx.FEATURE.AI_CONSULT);
+      ctx.hideElement(
+        el.closest("rz-chat-bot-invitation, .invitation-wrapper, .invitations-wrapper, rz-chat-bot-button-placeholder"),
+        ctx.FEATURE.AI_CONSULT
+      );
     });
   }
 

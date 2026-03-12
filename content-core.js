@@ -54,6 +54,7 @@
   const OBSERVER_HINT_SELECTOR = [
     "rz-product-tile",
     "rz-red-price",
+    "rz-tile-red-price",
     "rz-promo-label",
     "rz-product-pictograms",
     "rz-product-banner",
@@ -64,6 +65,7 @@
     "rz-tile-info",
     "rz-chat-bot-button-assist",
     "rz-chat-bot-button-placeholder",
+    "rz-chat-bot-invitation",
     "rz-smart-description-button",
     "rz-delivery-premium",
     "rz-delivery-price",
@@ -79,6 +81,7 @@
     "rz-tag-list",
     '[data-testid="advertising-slider"]',
     '[data-testid="promo-price"]',
+    '[data-testid="red-price-discount"]',
     ".red-label",
     ".tile-promo-label",
     ".promo-label",
@@ -101,6 +104,7 @@
   const HINT_TAGS = new Set([
     "RZ-PRODUCT-TILE",
     "RZ-RED-PRICE",
+    "RZ-TILE-RED-PRICE",
     "RZ-PROMO-LABEL",
     "RZ-PRODUCT-PICTOGRAMS",
     "RZ-PRODUCT-BANNER",
@@ -111,6 +115,7 @@
     "RZ-TILE-INFO",
     "RZ-CHAT-BOT-BUTTON-ASSIST",
     "RZ-CHAT-BOT-BUTTON-PLACEHOLDER",
+    "RZ-CHAT-BOT-INVITATION",
     "RZ-SMART-DESCRIPTION-BUTTON",
     "RZ-DELIVERY-PREMIUM",
     "RZ-DELIVERY-PRICE",
@@ -207,6 +212,18 @@
     } catch (err) {
       return null;
     }
+  }
+
+  function safeMatches(node, selector) {
+    if (!node || node.nodeType !== Node.ELEMENT_NODE || !selector) return false;
+    if (typeof node.matches === "function") {
+      try {
+        return node.matches(selector);
+      } catch (err) {
+        return false;
+      }
+    }
+    return safeClosest(node, selector) === node;
   }
 
   function getTextList(raw, limit = 50) {
@@ -359,6 +376,11 @@
     let matched = false;
     rules.forEach((rule) => {
       if (!rule || !rule.query) return;
+      if (scope !== document && safeMatches(scope, rule.query)) {
+        matched = true;
+        const removable = rule.closest ? safeClosest(scope, rule.closest) || scope : scope;
+        hideElement(removable, featureId);
+      }
       safeQueryAll(scope, rule.query).forEach((node) => {
         matched = true;
         const removable = rule.closest ? safeClosest(node, rule.closest) || node : node;
@@ -372,6 +394,11 @@
     const scope = root && root.querySelectorAll ? root : document;
     let matched = false;
     selectors.forEach((selector) => {
+      if (scope !== document && safeMatches(scope, selector)) {
+        matched = true;
+        hideElement(scope, featureId);
+        extraClosestSelectors.forEach((closestSel) => hideElement(safeClosest(scope, closestSel), featureId));
+      }
       safeQueryAll(scope, selector).forEach((el) => {
         matched = true;
         hideElement(el, featureId);
@@ -473,7 +500,8 @@
         selectorMatches: countUniqueMatchesBySelectors(scope, [
           "rz-product-tile",
           "rz-product-tile rz-tile-price",
-          "rz-product-tile rz-red-price"
+          "rz-product-tile rz-red-price",
+          "rz-product-tile rz-tile-red-price"
         ]),
         textMatch: null,
         statusMode: "presence"

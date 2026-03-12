@@ -69,6 +69,13 @@ test('config has selector for marketing email banner', () => {
   assert.ok(queries.includes('rz-marketing-subscription-banner'));
 });
 
+test('config promo selectors support updated red price tile markup', () => {
+  const rules = loadConfig().selectors.promoMain || [];
+  const queries = rules.map((r) => r.query);
+  assert.ok(queries.includes('rz-tile-red-price button.reset-btn'));
+  assert.ok(queries.includes('rz-tile-red-price [data-testid="red-price-discount"]'));
+});
+
 test('config has selector for product pictograms block', () => {
   const rules = loadConfig().selectors.productPictograms || [];
   const queries = rules.map((r) => r.query);
@@ -97,4 +104,11 @@ test('config has selector for promotion product block', () => {
   const rules = loadConfig().selectors.promotionProduct || [];
   const queries = rules.map((r) => r.query);
   assert.ok(queries.includes('rz-promotion-product'));
+});
+
+test('config has selectors for updated AI consultation invitation markup', () => {
+  const selectors = loadConfig().selectors.aiConsultation || [];
+  assert.ok(selectors.includes('rz-chat-bot-button-assist rz-chat-bot-invitation'));
+  assert.ok(selectors.includes('rz-chat-bot-invitation .invitations-wrapper'));
+  assert.ok(selectors.includes('rz-chat-bot-invitation .invitation-wrapper'));
 });

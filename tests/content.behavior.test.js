@@ -521,6 +521,24 @@ test('observer childList mutation hides dynamically added sidebar smart links', 
   assert.equal(isHidden(smartSubscribeLink), true);
 });
 
+test('observer childList mutation hides dynamically added AI assist host node', async () => {
+  const harness = createHarness({ hideRozetkaAI: true });
+  await harness.runContent();
+
+  const observer = harness.getLastObserver();
+  assert.ok(observer, 'observer was not created');
+
+  const aiAssist = harness.createElement('rz-chat-bot-button-assist', { classes: ['right-assist'] });
+  observer.trigger([
+    {
+      type: 'childList',
+      addedNodes: [aiAssist]
+    }
+  ]);
+
+  assert.equal(isHidden(aiAssist), true);
+});
+
 test('style mutation marks hidden node as dirty and reveal clears inline hide styles', async () => {
   const harness = createHarness();
   const targets = makeTargets(harness);
@@ -556,6 +574,27 @@ test('content keeps cleanup running when closest selector resolution throws', as
   await harness.runContent();
 
   assert.equal(isHidden(riskyNode), true);
+});
+
+test('content hides updated red price tile markup for card price block', async () => {
+  const harness = createHarness({ hidePromoBlocks: true });
+  const tileRedPrice = harness.createElement('rz-tile-red-price');
+  const regularPrice = harness.createElement('div', { classes: ['price'] });
+  regularPrice.textContent = '12 999';
+  const discountButton = harness.createElement('button', { classes: ['reset-btn'] });
+  const discountPrice = harness.createElement('span');
+  discountPrice.setAttribute('data-testid', 'red-price-discount');
+  discountButton.appendChild(discountPrice);
+  tileRedPrice.appendChild(regularPrice);
+  tileRedPrice.appendChild(discountButton);
+
+  harness.document.setQueryResult('rz-tile-red-price button.reset-btn', [discountButton]);
+  harness.document.setQueryResult('rz-tile-red-price [data-testid="red-price-discount"]', [discountPrice]);
+
+  await harness.runContent();
+
+  assert.equal(isHidden(tileRedPrice), false);
+  assert.equal(isHidden(discountButton), true);
 });
 
 test('content adds tile gallery arrows and switches image on click', async () => {
@@ -955,4 +994,51 @@ test('content collapses rz-rich-content blocks and restores them when extension 
 
   assert.equal(richBlock.classList.contains('rzc-rich-collapsed'), false);
   assert.equal(richBlock.getAttribute('data-rzc-rich-collapsible'), null);
+});
+
+test('content hides legacy AI consultation placeholder block', async () => {
+  const harness = createHarness({ hideRozetkaAI: false, hideAiConsultationBlock: true });
+  const { document } = harness;
+
+  const placeholder = harness.createElement('rz-chat-bot-button-placeholder');
+  const invitation = harness.createElement('div', { classes: ['invitation'] });
+  placeholder.appendChild(invitation);
+
+  document.setQueryResult('rz-chat-bot-button-placeholder', [placeholder]);
+  document.setQueryResult('rz-chat-bot-button-placeholder .invitation', [invitation]);
+
+  await harness.runContent();
+
+  assert.equal(isHidden(placeholder), true);
+  assert.equal(isHidden(invitation), true);
+});
+
+test('content hides updated AI consultation invitation without hiding AI assist button', async () => {
+  const harness = createHarness({ hideRozetkaAI: false, hideAiConsultationBlock: true });
+  const { document } = harness;
+
+  const assist = harness.createElement('rz-chat-bot-button-assist');
+  const invitationHost = harness.createElement('rz-chat-bot-invitation');
+  const invitationsWrapper = harness.createElement('div', { classes: ['invitations-wrapper'] });
+  const invitationWrapper = harness.createElement('div', { classes: ['invitation-wrapper'] });
+  const invitationText = harness.createElement('div', {
+    classes: ['text-base', 'invitation'],
+    textContent: 'Я поясню характеристики і допоможу підібрати товар.'
+  });
+  invitationWrapper.appendChild(invitationText);
+  invitationsWrapper.appendChild(invitationWrapper);
+  invitationHost.appendChild(invitationsWrapper);
+  assist.appendChild(invitationHost);
+
+  document.setQueryResult('rz-chat-bot-button-assist rz-chat-bot-invitation', [invitationHost]);
+  document.setQueryResult('rz-chat-bot-invitation .invitations-wrapper', [invitationsWrapper]);
+  document.setQueryResult('rz-chat-bot-invitation .invitation-wrapper', [invitationWrapper]);
+  document.setQueryResult('rz-chat-bot-invitation .text-base.invitation', [invitationText]);
+
+  await harness.runContent();
+
+  assert.equal(isHidden(invitationHost), true);
+  assert.equal(isHidden(invitationsWrapper), true);
+  assert.equal(isHidden(invitationWrapper), true);
+  assert.equal(isHidden(assist), false);
 });

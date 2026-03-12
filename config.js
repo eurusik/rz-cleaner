@@ -37,6 +37,8 @@
         { query: 'rz-product-tile [data-testid="promo-price"]', closest: "button.red-label" },
         { query: "rz-red-price" },
         { query: "rz-red-price .red-price-container", closest: "rz-red-price" },
+        { query: "rz-tile-red-price button.reset-btn", closest: "button.reset-btn" },
+        { query: 'rz-tile-red-price [data-testid="red-price-discount"]', closest: "button" },
         { query: "rz-product-banner" },
         { query: "rz-product-banner .product-banner", closest: "rz-product-banner" }
       ],
@@ -87,7 +89,11 @@
       ],
       aiConsultation: [
         "rz-chat-bot-button-placeholder",
-        "rz-chat-bot-button-placeholder .invitation"
+        "rz-chat-bot-button-placeholder .invitation",
+        "rz-chat-bot-button-assist rz-chat-bot-invitation",
+        "rz-chat-bot-invitation .invitations-wrapper",
+        "rz-chat-bot-invitation .invitation-wrapper",
+        "rz-chat-bot-invitation .text-base.invitation"
       ],
       popularSearchChips: [
         { query: "rz-tag-list.max-three-rows", closest: "rz-tag-list" },

@@ -79,6 +79,11 @@ test('styles keep native rich-content button hidden when custom spoiler is activ
     'rz-rich-content[data-rzc-rich-collapsible="1"] rz-read-all-btn',
     'styles.css'
   );
+  mustContain(
+    styles,
+    'rz-tile-red-price:has(button.reset-btn.rzc-hidden) .price',
+    'styles.css'
+  );
 });
 
 test('feature registry aggregates modules', () => {
@@ -91,6 +96,8 @@ test('content observer hints include smart/delivery/email and rich tags', () => 
   mustContain(core, '"rz-smart-description-button"', 'content-core.js');
   mustContain(core, '"rz-delivery-premium"', 'content-core.js');
   mustContain(core, '"rz-delivery-price"', 'content-core.js');
+  mustContain(core, '"rz-tile-red-price"', 'content-core.js');
+  mustContain(core, '"rz-chat-bot-invitation"', 'content-core.js');
   mustContain(core, '"rz-marketing-subscription-banner"', 'content-core.js');
   mustContain(core, '"rz-red-card-link"', 'content-core.js');
   mustContain(core, '"rz-smart-subscribe-link"', 'content-core.js');
@@ -104,6 +111,8 @@ test('content observer hints include smart/delivery/email and rich tags', () => 
   mustContain(core, '"rz-rich-content"', 'content-core.js');
   mustContain(core, '"RZ-STORE-RICH-CONTENT"', 'content-core.js');
   mustContain(core, '"RZ-RICH-CONTENT"', 'content-core.js');
+  mustContain(core, '"RZ-CHAT-BOT-INVITATION"', 'content-core.js');
+  mustContain(core, '"RZ-TILE-RED-PRICE"', 'content-core.js');
   mustContain(core, '"RZ-RED-CARD-LINK"', 'content-core.js');
   mustContain(core, '"RZ-SMART-SUBSCRIBE-LINK"', 'content-core.js');
   mustContain(core, '"RZ-PRODUCT-CARRIAGE"', 'content-core.js');

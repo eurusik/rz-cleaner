@@ -26,6 +26,25 @@ html.rzc-normalize-price rz-product-tile rz-tile-price .price {
   font-weight: 700 !important;
 }
 
+/* When card-price button is hidden in new red-price tile markup, keep regular price prominent */
+html.rzc-normalize-price rz-product-tile rz-tile-red-price:has(button.reset-btn.rzc-hidden) .d-flex.gap-1 {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 2px !important;
+}
+
+html.rzc-normalize-price rz-product-tile rz-tile-red-price:has(button.reset-btn.rzc-hidden) .old-price {
+  order: 1;
+}
+
+html.rzc-normalize-price rz-product-tile rz-tile-red-price:has(button.reset-btn.rzc-hidden) .price {
+  order: 2;
+  font-size: 1.15rem !important;
+  line-height: 1.05 !important;
+  font-weight: 700 !important;
+}
+
 /* Collapsible product description block (rz-store-rich-content / rz-rich-content) */
 rz-store-rich-content.rzc-rich-collapsed .rich-content,
 rz-rich-content.rzc-rich-collapsed .rich-content,
